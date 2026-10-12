@@ -541,12 +541,53 @@ export function ScSitemapsTab({
   )
 }
 
-export function SearchConsoleDashboard({apiUrl}: {apiUrl: string}) {
+export const OverviewTab = ScOverviewTab
+export const QueriesTab = ScQueriesTab
+export const PagesTab = ScPagesTab
+export const CountriesTab = ScCountriesTab
+export const DevicesTab = ScDevicesTab
+export const AppearanceTab = ScAppearanceTab
+export const SitemapsTab = ScSitemapsTab
+
+export function SearchConsoleTool({apiUrl}: {apiUrl?: string}) {
+  return <SearchConsoleDashboard apiUrl={apiUrl || '/api/search-console'} />
+}
+
+export type ScTab = Tab
+export type SearchConsoleTab = Tab
+
+export function SearchConsoleDashboard({
+  apiUrl,
+  initialTab = 'overview',
+  activeTab: controlledTab,
+  onTabChange,
+}: {
+  apiUrl: string
+  initialTab?: ScTab
+  activeTab?: ScTab
+  onTabChange?: (tab: ScTab) => void
+}) {
   const [data, setData] = useState<SearchConsoleData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<ScDateRange>('28')
-  const [activeTab, setActiveTab] = useState<Tab>('overview')
+  const [uncontrolledTab, setUncontrolledTab] = useState<ScTab>(initialTab)
+
+  const activeTab = controlledTab !== undefined ? controlledTab : uncontrolledTab
+
+  const handleTabChange = useCallback(
+    (nextTab: ScTab) => {
+      setUncontrolledTab(nextTab)
+      onTabChange?.(nextTab)
+    },
+    [onTabChange],
+  )
+
+  useEffect(() => {
+    if (initialTab) {
+      setUncontrolledTab(initialTab)
+    }
+  }, [initialTab])
 
   const loadData = useCallback(async () => {
     try {
@@ -582,7 +623,7 @@ export function SearchConsoleDashboard({apiUrl}: {apiUrl: string}) {
       icon={<Target size={18} />}
       tabs={TABS}
       activeTab={activeTab}
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
       dateRanges={DATE_RANGES}
       dateRange={dateRange}
       onDateRangeChange={setDateRange}
@@ -601,3 +642,4 @@ export function SearchConsoleDashboard({apiUrl}: {apiUrl: string}) {
     </DashboardShell>
   )
 }
+

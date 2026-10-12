@@ -50,7 +50,8 @@ export const DASHBOARD_CSS = `
 @keyframes ad-scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 
 .ad-shell {
-  height: calc(100vh - 51px);
+  height: calc(100vh - 52px);
+  width: 100%;
   background:
     linear-gradient(145deg, rgba(255,255,255,.72), rgba(241,245,249,.88)),
     radial-gradient(ellipse at 10% 20%, color-mix(in srgb, var(--ad-primary) 8%, transparent), transparent 50%),

@@ -10,9 +10,12 @@ import {
 export { UnifiedDashboard, type UnifiedDashboardProps, type MainSection, type UnifiedTabId }
 export { UnifiedDashboard as PharmacyAnalyticsDashboard }
 
-// Re-export Search Console component and tabs
-export {
+import { definePlugin } from 'sanity'
+import { SearchIcon } from '@sanity/icons'
+
+import {
   SearchConsoleDashboard,
+  SearchConsoleTool,
   ScOverviewTab,
   ScQueriesTab,
   ScPagesTab,
@@ -20,7 +23,58 @@ export {
   ScDevicesTab,
   ScAppearanceTab,
   ScSitemapsTab,
+  OverviewTab,
+  QueriesTab,
+  PagesTab,
+  CountriesTab,
+  DevicesTab,
+  AppearanceTab,
+  SitemapsTab,
+  type ScTab,
+  type SearchConsoleTab,
 } from './search-console/search-console-dashboard'
+
+import type { SearchConsolePluginConfig } from './search-console/search-console-types'
+
+export {
+  SearchConsoleDashboard,
+  SearchConsoleTool,
+  ScOverviewTab,
+  ScQueriesTab,
+  ScPagesTab,
+  ScCountriesTab,
+  ScDevicesTab,
+  ScAppearanceTab,
+  ScSitemapsTab,
+  OverviewTab,
+  QueriesTab,
+  PagesTab,
+  CountriesTab,
+  DevicesTab,
+  AppearanceTab,
+  SitemapsTab,
+  type ScTab,
+  type SearchConsoleTab,
+  type SearchConsolePluginConfig,
+}
+
+export {
+  DashboardShell,
+  DASHBOARD_CSS,
+  SC_ACCENT,
+  GA_ACCENT,
+  MetricCard,
+  MetricGrid,
+  DataTable,
+  Donut,
+  HorizontalBar,
+  PathCell,
+  StatusPill,
+  ErrorState,
+  InitialLoading,
+  SkeletonChart,
+  Panel,
+} from './search-console/dashboard-ui'
 
 // Explicitly re-export GA types & Search Console types
 export type {
@@ -108,3 +162,40 @@ export function pharmacyAnalyticsPlugin(config: PharmacyAnalyticsPluginConfig = 
     ],
   }
 }
+
+/**
+ * Standalone Search Console Sanity Studio plugin (1:1 identical to Strachans Pharmacy).
+ *
+ * Usage in sanity.config.ts:
+ * ```ts
+ * import { searchConsolePlugin } from '@healthya-team/pharmacy-analytics/studio'
+ *
+ * export default defineConfig({
+ *   // ...
+ *   plugins: [
+ *     searchConsolePlugin({
+ *       apiUrl: '/api/search-console',
+ *     }),
+ *   ],
+ * })
+ * ```
+ */
+export const searchConsolePlugin = (
+  config: SearchConsolePluginConfig = {},
+) =>
+  definePlugin({
+    name: 'search-console',
+    tools: (prev) => {
+      if (config.disabled) return prev
+      return [
+        ...prev,
+        {
+          name: 'search-console',
+          title: 'Search Console',
+          icon: SearchIcon,
+          component: () => <SearchConsoleTool apiUrl={config.apiUrl} />,
+        },
+      ]
+    },
+  })()
+

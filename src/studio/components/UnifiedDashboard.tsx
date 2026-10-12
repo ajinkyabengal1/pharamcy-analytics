@@ -28,15 +28,10 @@ import {ConditionsProductsTab} from '../tabs/conditions-products-tab'
 import {FunnelEventsTab} from '../funnel/funnel-events-tab'
 import {PmFunnelTab} from '../funnel/pm-funnel-tab'
 
-// Search Console tabs
+// Search Console dashboard & types
 import {
-  ScOverviewTab,
-  ScQueriesTab,
-  ScPagesTab,
-  ScCountriesTab,
-  ScDevicesTab,
-  ScAppearanceTab,
-  ScSitemapsTab,
+  SearchConsoleDashboard,
+  type ScTab,
 } from '../search-console/search-console-dashboard'
 
 // Combined executive overview tab
@@ -91,14 +86,14 @@ const CUSTOM_SUB_TABS = [
   {id: 'pm-funnel', label: 'PM Funnel Events', icon: '💊'},
 ]
 
-const SC_SUB_TABS = [
-  {id: 'sc-overview', label: 'Overview', icon: '◎'},
-  {id: 'sc-queries', label: 'Top Queries', icon: '🔍'},
-  {id: 'sc-pages', label: 'Top Pages', icon: '📄'},
-  {id: 'sc-countries', label: 'Countries', icon: '🌐'},
-  {id: 'sc-devices', label: 'Devices', icon: '📱'},
-  {id: 'sc-appearance', label: 'Appearance', icon: '✨'},
-  {id: 'sc-sitemaps', label: 'Sitemaps', icon: '🗺️'},
+const SC_SUB_TABS: {id: UnifiedTabId; scId: ScTab; label: string; icon: string}[] = [
+  {id: 'sc-overview', scId: 'overview', label: 'Overview', icon: '◎'},
+  {id: 'sc-queries', scId: 'queries', label: 'Top Queries', icon: '🔍'},
+  {id: 'sc-pages', scId: 'pages', label: 'Top Pages', icon: '📄'},
+  {id: 'sc-countries', scId: 'countries', label: 'Countries', icon: '🌐'},
+  {id: 'sc-devices', scId: 'devices', label: 'Devices', icon: '📱'},
+  {id: 'sc-appearance', scId: 'appearance', label: 'Appearance', icon: '✨'},
+  {id: 'sc-sitemaps', scId: 'sitemaps', label: 'Sitemaps', icon: '🗺️'},
 ]
 
 function mapToScRange(range: DateRange): ScDateRange {
@@ -116,6 +111,7 @@ export function UnifiedDashboard({
   // Main center section: 'all' | 'analytics' | 'custom' | 'search-console'
   const [activeMainSection, setActiveMainSection] = useState<MainSection>('all')
   const [activeTab, setActiveTab] = useState<UnifiedTabId>('all-overview')
+  const [scActiveTab, setScActiveTab] = useState<ScTab>('overview')
 
   // Date range
   const [dateRange, setDateRange] = useState<DateRange>('30')
@@ -203,7 +199,7 @@ export function UnifiedDashboard({
     } else if (section === 'custom') {
       setActiveTab('conditions-products')
     } else if (section === 'search-console') {
-      setActiveTab('sc-overview')
+      setScActiveTab('overview')
     }
   }
 
@@ -381,57 +377,118 @@ export function UnifiedDashboard({
 
         {/* Right: Date Range Selector & Refresh */}
         <div style={{display: 'flex', alignItems: 'center', gap: 10, minWidth: 200, justifyContent: 'flex-end'}}>
-          {/* Quick Date Range */}
-          <div style={{display: 'flex', gap: 3, background: '#f1f5f9', padding: 2, borderRadius: 7}}>
-            {DATE_RANGES.map((r) => (
-              <button
-                key={r.value}
-                onClick={() => setDateRange(r.value)}
+          {activeMainSection === 'search-console' ? (
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span
                 style={{
-                  padding: '4px 8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '4px 10px',
+                  borderRadius: 6,
+                  background: 'rgba(15, 159, 110, 0.08)',
+                  color: '#0f9f6e',
                   fontSize: 11,
-                  fontWeight: dateRange === r.value ? 700 : 500,
-                  borderRadius: 5,
-                  border: 'none',
-                  background: dateRange === r.value ? '#fff' : 'transparent',
-                  color: dateRange === r.value ? '#2563eb' : '#64748b',
-                  cursor: 'pointer',
-                  boxShadow: dateRange === r.value ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                  fontWeight: 600,
+                  border: '1px solid rgba(15, 159, 110, 0.2)',
                 }}
               >
-                {r.label}
-              </button>
-            ))}
-          </div>
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: '#0f9f6e',
+                  }}
+                />
+                Search Console API
+              </span>
+              <a
+                href="https://search.google.com/search-console"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 11,
+                  color: '#64748b',
+                  textDecoration: 'none',
+                  padding: '4px 8px',
+                  borderRadius: 6,
+                  border: '1px solid #e2e8f0',
+                  background: '#fff',
+                }}
+              >
+                <span>Console</span>
+                <ExternalLink size={11} />
+              </a>
+            </div>
+          ) : (
+            <>
+              {/* Quick Date Range */}
+              <div style={{display: 'flex', gap: 3, background: '#f1f5f9', padding: 2, borderRadius: 7}}>
+                {DATE_RANGES.map((r) => (
+                  <button
+                    key={r.value}
+                    onClick={() => setDateRange(r.value)}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: 11,
+                      fontWeight: dateRange === r.value ? 700 : 500,
+                      borderRadius: 5,
+                      border: 'none',
+                      background: dateRange === r.value ? '#fff' : 'transparent',
+                      color: dateRange === r.value ? '#2563eb' : '#64748b',
+                      cursor: 'pointer',
+                      boxShadow: dateRange === r.value ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                    }}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
 
-          {/* Master Refresh */}
-          <button
-            onClick={loadAllData}
-            title="Refresh All Analytics"
-            style={{
-              padding: '6px 10px',
-              borderRadius: 7,
-              border: '1px solid #e2e8f0',
-              background: '#fff',
-              color: anyLoading ? '#94a3b8' : '#475569',
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-            }}
-          >
-            <RefreshCw size={13} className={anyLoading ? 'ga-spin' : ''} />
-            <span>{anyLoading ? 'Refreshing' : 'Refresh'}</span>
-          </button>
+              {/* Master Refresh */}
+              <button
+                onClick={loadAllData}
+                title="Refresh All Analytics"
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: 7,
+                  border: '1px solid #e2e8f0',
+                  background: '#fff',
+                  color: anyLoading ? '#94a3b8' : '#475569',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                }}
+              >
+                <RefreshCw size={13} className={anyLoading ? 'ga-spin' : ''} />
+                <span>{anyLoading ? 'Refreshing' : 'Refresh'}</span>
+              </button>
+            </>
+          )}
         </div>
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          MAIN BODY LAYOUT (Sidebar + Content Panel)
+          MAIN BODY LAYOUT
          ═══════════════════════════════════════════════════════════════════════ */}
-      <div style={{display: 'flex', flex: 1, height: SIDEBAR_HEIGHT, overflow: 'hidden'}}>
+      {activeMainSection === 'search-console' ? (
+        <div style={{flex: 1, height: SIDEBAR_HEIGHT, overflow: 'hidden'}}>
+          <SearchConsoleDashboard
+            apiUrl={effectiveScUrl}
+            initialTab={scActiveTab}
+            activeTab={scActiveTab}
+            onTabChange={setScActiveTab}
+          />
+        </div>
+      ) : (
+        <div style={{display: 'flex', flex: 1, height: SIDEBAR_HEIGHT, overflow: 'hidden'}}>
         {/* ── SIDEBAR ── */}
         <aside
           style={{
@@ -604,8 +661,8 @@ export function UnifiedDashboard({
               </div>
             )}
 
-            {/* ── 3. Google Search Console Group (Shown in 'all' and 'search-console') ── */}
-            {(activeMainSection === 'all' || activeMainSection === 'search-console') && (
+            {/* ── 3. Google Search Console Group (Shown in 'all') ── */}
+            {activeMainSection === 'all' && (
               <div style={{marginBottom: 14}}>
                 <button
                   onClick={() => setScOpen((o) => !o)}
@@ -641,26 +698,26 @@ export function UnifiedDashboard({
 
                 {scOpen &&
                   SC_SUB_TABS.map((tab) => {
-                    const active = activeTab === tab.id
+                    const isScActive = activeTab === tab.id
                     return (
                       <button
                         key={tab.id}
-                        className={`ad-subtab-btn ${active ? 'active' : ''}`}
+                        className={`ad-subtab-btn ${isScActive ? 'active' : ''}`}
                         onClick={() => {
-                          setActiveTab(tab.id as UnifiedTabId)
-                          if (activeMainSection !== 'all') setActiveMainSection('search-console')
+                          setScActiveTab(tab.scId)
+                          setActiveMainSection('search-console')
                         }}
                       >
                         <span style={{opacity: 0.8, width: 16, display: 'inline-flex'}}>{tab.icon}</span>
                         <span>{tab.label}</span>
-                        {active && (
+                        {isScActive && (
                           <span
                             style={{
                               marginLeft: 'auto',
                               width: 5,
                               height: 5,
                               borderRadius: '50%',
-                              background: '#2563eb',
+                              background: '#0f9f6e',
                             }}
                           />
                         )}
@@ -757,15 +814,19 @@ export function UnifiedDashboard({
               loadingGa={loadingGa}
               loadingSc={loadingSc}
               onSelectSection={(section, subTab) => {
-                setActiveMainSection(section)
-                if (subTab) {
-                  setActiveTab(subTab as UnifiedTabId)
-                } else if (section === 'analytics') {
-                  setActiveTab('overview')
-                } else if (section === 'custom') {
-                  setActiveTab('conditions-products')
-                } else if (section === 'search-console') {
-                  setActiveTab('sc-overview')
+                if (section === 'search-console') {
+                  const mapped = subTab ? (subTab.replace('sc-', '') as ScTab) : 'overview'
+                  setScActiveTab(mapped)
+                  setActiveMainSection('search-console')
+                } else {
+                  setActiveMainSection(section)
+                  if (subTab) {
+                    setActiveTab(subTab as UnifiedTabId)
+                  } else if (section === 'analytics') {
+                    setActiveTab('overview')
+                  } else if (section === 'custom') {
+                    setActiveTab('conditions-products')
+                  }
                 }
               }}
             />
@@ -805,35 +866,18 @@ export function UnifiedDashboard({
             <PmFunnelTab apiUrl={apiUrl} dateRange={dateRange} />
           )}
 
-          {/* 4. Google Search Console Tabs */}
-          {activeTab === 'sc-overview' && scData && (
-            <ScOverviewTab data={scData} loading={loadingSc} />
-          )}
-          {activeTab === 'sc-queries' && scData && (
-            <ScQueriesTab data={scData} loading={loadingSc} />
-          )}
-          {activeTab === 'sc-pages' && scData && (
-            <ScPagesTab data={scData} loading={loadingSc} />
-          )}
-          {activeTab === 'sc-countries' && scData && (
-            <ScCountriesTab data={scData} loading={loadingSc} />
-          )}
-          {activeTab === 'sc-devices' && scData && (
-            <ScDevicesTab data={scData} loading={loadingSc} />
-          )}
-          {activeTab === 'sc-appearance' && scData && (
-            <ScAppearanceTab data={scData} loading={loadingSc} />
-          )}
-          {activeTab === 'sc-sitemaps' && scData && (
-            <ScSitemapsTab
-              data={scData}
+          {/* 4. Google Search Console Tabs (Full Strachans UI) */}
+          {activeTab.startsWith('sc-') && (
+            <SearchConsoleDashboard
               apiUrl={effectiveScUrl}
-              onRefreshData={loadScData}
-              loading={loadingSc}
+              initialTab={(activeTab.replace('sc-', '') as ScTab) || 'overview'}
+              activeTab={scActiveTab}
+              onTabChange={setScActiveTab}
             />
           )}
         </main>
       </div>
+      )}
     </div>
   )
 }
