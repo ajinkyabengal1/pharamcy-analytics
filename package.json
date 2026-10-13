@@ -2,6 +2,9 @@
   "name": "@healthya-team/pharmacy-analytics",
   "version": "1.0.0",
   "description": "Unified analytics package for pharmacy platforms: Google Analytics 4, Mixpanel funnels, and Google Search Console with Sanity Studio dashboards.",
+  "repository": { "type": "git", "url": "git+https://github.com/ajinkyabengal1/pharamcy-analytics.git" },
+  "publishConfig": { "access": "restricted" },
+  "engines": { "node": ">=20" },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -46,7 +49,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "prepare": "tsup",
+    "prepublishOnly": "pnpm typecheck && pnpm build",
     "dev": "tsup --watch",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
