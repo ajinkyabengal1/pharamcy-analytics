@@ -10,7 +10,7 @@ export default defineConfig({
   format: ["cjs", "esm"],
   dts: true,
   clean: true,
-  sourcemap: true,
+  sourcemap: false,
   splitting: false,
   external: ["react", "react-dom", "next", "sanity", "next/script", "next/navigation"],
 });
