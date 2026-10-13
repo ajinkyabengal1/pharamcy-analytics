@@ -7,6 +7,8 @@ export interface AnalyticsServerConfig {
   gaServiceAccountEmail?: string;
   gaPrivateKey?: string;
   searchConsoleSiteUrl?: string;
+  searchConsoleServiceAccountEmail?: string;
+  searchConsolePrivateKey?: string;
   corsOrigin?: string;
 }
 
@@ -16,7 +18,6 @@ const SC_API_BASE = "https://www.googleapis.com/webmasters/v3";
 
 const GA_SCOPE = "https://www.googleapis.com/auth/analytics.readonly";
 const SC_SCOPE = "https://www.googleapis.com/auth/webmasters";
-const COMBINED_SCOPE = `${GA_SCOPE} ${SC_SCOPE}`;
 
 interface CachedToken {
   value: string;
@@ -942,6 +943,15 @@ async function handleStandardGaReports(
     }),
   ]);
 
+  // If the overview query failed (e.g. permission denied, invalid property ID),
+  // return the error to the client instead of swallowing it with empty objects.
+  if (settled[0].status === "rejected") {
+    const reason = settled[0].reason;
+    const msg = reason instanceof Error ? reason.message : String(reason);
+    console.error("[pharmacy-analytics:server] GA overview query failed:", msg);
+    return Response.json({ error: msg }, { status: 500 });
+  }
+
   const ok = (i: number) => {
     const s = settled[i];
     return s && s.status === "fulfilled"
@@ -1092,8 +1102,17 @@ export function createAnalyticsApiHandler(config?: AnalyticsServerConfig) {
         process.env.SEARCH_CONSOLE_SITE_URL ||
         process.env.NEXT_PUBLIC_SEARCH_CONSOLE_SITE_URL;
 
-      const clientEmail = config?.gaServiceAccountEmail || process.env.GA_SERVICE_ACCOUNT_EMAIL;
-      const privateKey = config?.gaPrivateKey || process.env.GA_PRIVATE_KEY;
+      const gaClientEmail = config?.gaServiceAccountEmail || process.env.GA_SERVICE_ACCOUNT_EMAIL;
+      const gaPrivateKey = config?.gaPrivateKey || process.env.GA_PRIVATE_KEY;
+
+      const scClientEmail =
+        config?.searchConsoleServiceAccountEmail ||
+        process.env.SEARCH_CONSOLE_SERVICE_ACCOUNT_EMAIL ||
+        gaClientEmail;
+      const scPrivateKey =
+        config?.searchConsolePrivateKey ||
+        process.env.SEARCH_CONSOLE_PRIVATE_KEY ||
+        gaPrivateKey;
 
       const isSearchConsole =
         mode === "search-console" ||
@@ -1104,11 +1123,17 @@ export function createAnalyticsApiHandler(config?: AnalyticsServerConfig) {
       if (isSearchConsole) {
         if (!scSiteUrl) {
           return Response.json(
-            { error: "SEARCH_CONSOLE_SITE_URL not configured" },
+            { error: "SEARCH_CONSOLE_SITE_URL is not configured. Please set SEARCH_CONSOLE_SITE_URL in your environment or plugin config." },
             { status: 500 },
           );
         }
-        const scToken = await getAccessToken(SC_SCOPE, clientEmail, privateKey);
+        if (!scClientEmail || !scPrivateKey) {
+          return Response.json(
+            { error: "Google service account credentials missing for Search Console. Please set GA_SERVICE_ACCOUNT_EMAIL or SEARCH_CONSOLE_SERVICE_ACCOUNT_EMAIL." },
+            { status: 500 },
+          );
+        }
+        const scToken = await getAccessToken(SC_SCOPE, scClientEmail, scPrivateKey);
         const days = parseInt(dateRange, 10) || 28;
         return handleSearchConsoleReports(scSiteUrl, scToken, days);
       }
@@ -1120,8 +1145,14 @@ export function createAnalyticsApiHandler(config?: AnalyticsServerConfig) {
           { status: 500 },
         );
       }
+      if (!gaClientEmail || !gaPrivateKey) {
+        return Response.json(
+          { error: "Google service account credentials missing for Google Analytics. Please set GA_SERVICE_ACCOUNT_EMAIL and GA_PRIVATE_KEY." },
+          { status: 500 },
+        );
+      }
 
-      const gaToken = await getAccessToken(GA_SCOPE, clientEmail, privateKey);
+      const gaToken = await getAccessToken(GA_SCOPE, gaClientEmail, gaPrivateKey);
 
       if (mode === "event-params") {
         const eventName = searchParams.get("event");
@@ -1212,8 +1243,16 @@ export function createAnalyticsApiHandler(config?: AnalyticsServerConfig) {
         );
       }
 
-      const clientEmail = config?.gaServiceAccountEmail || process.env.GA_SERVICE_ACCOUNT_EMAIL;
-      const privateKey = config?.gaPrivateKey || process.env.GA_PRIVATE_KEY;
+      const clientEmail =
+        config?.searchConsoleServiceAccountEmail ||
+        process.env.SEARCH_CONSOLE_SERVICE_ACCOUNT_EMAIL ||
+        config?.gaServiceAccountEmail ||
+        process.env.GA_SERVICE_ACCOUNT_EMAIL;
+      const privateKey =
+        config?.searchConsolePrivateKey ||
+        process.env.SEARCH_CONSOLE_PRIVATE_KEY ||
+        config?.gaPrivateKey ||
+        process.env.GA_PRIVATE_KEY;
 
       const body = (await request.json().catch(() => ({}))) as { sitemapUrl?: string };
       const feedpath = body?.sitemapUrl;

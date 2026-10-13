@@ -65,6 +65,7 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
     if (patientModalOpen && refreshKey > 0) {
       doFetchPatients()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- must re-run only when refreshKey bumps
   }, [refreshKey])
 
   const exportPatientsCSV = useCallback(() => {

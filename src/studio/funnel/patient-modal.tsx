@@ -1,6 +1,5 @@
 import React, {useMemo} from 'react'
 import type {SignupPatientRecord} from '../utils-mixpanel-api'
-import {fNum} from '../components/ga-constants'
 
 interface PatientModalProps {
   open: boolean

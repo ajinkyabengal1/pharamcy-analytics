@@ -2,8 +2,6 @@ import React from 'react'
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -12,21 +10,15 @@ import {
 } from 'recharts'
 import {
   BarChart3,
-  Eye,
-  MousePointerClick,
   Search,
-  Users,
   Pill,
-  TrendingUp,
   ArrowUpRight,
   Sparkles,
-  Layers,
-  Globe2,
 } from 'lucide-react'
 import type {AnalyticsData} from '../ga-types'
 import type {SearchConsoleData} from '../search-console/search-console-types'
 import {MetricCard, Panel, SkeletonChart} from '../components/shared-ui'
-import {fNum, fPct, fDur, PALETTE} from '../components/ga-constants'
+import {fNum, fPct} from '../components/ga-constants'
 
 export interface CombinedOverviewTabProps {
   gaData: AnalyticsData | null
@@ -43,7 +35,6 @@ export function CombinedOverviewTab({
   loadingSc,
   onSelectSection,
 }: CombinedOverviewTabProps) {
-  const loading = loadingGa || loadingSc
 
   // GA metrics
   const gaOverview = gaData?.overview
@@ -77,99 +68,64 @@ export function CombinedOverviewTab({
 
   return (
     <div className="ad-fade" style={{display: 'flex', flexDirection: 'column', gap: 24}}>
-      {/* ── Top Executive Hero Banner ── */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-          borderRadius: 14,
-          padding: '24px 28px',
-          color: '#fff',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 20,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        }}
-      >
-        <div>
-          <div style={{display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6}}>
-            <span
-              style={{
-                display: 'inline-flex',
-                padding: '4px 8px',
-                borderRadius: 6,
-                background: 'rgba(59, 130, 246, 0.25)',
-                color: '#60a5fa',
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-              }}
-            >
-              Executive Summary
-            </span>
-            <span style={{fontSize: 12, color: '#94a3b8'}}>Unified Multi-Channel Pharmacy Analytics</span>
-          </div>
-          <h2 style={{margin: '0 0 6px', fontSize: 22, fontWeight: 700, color: '#f8fafc'}}>
-            Pharmacy Digital Performance Overview
-          </h2>
-          <p style={{margin: 0, fontSize: 13, color: '#94a3b8', maxWidth: 620, lineHeight: 1.5}}>
-            Consolidated intelligence spanning Google Organic Search, visitor interactions, and healthcare consultation & prescription fulfillment funnels.
-          </p>
-        </div>
-
-        {activeNow > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              background: 'rgba(16, 185, 129, 0.15)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              borderRadius: 10,
-              padding: '10px 16px',
-            }}
-          >
-            <div
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                background: '#10b981',
-                boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.35)',
-                animation: 'ga-pulse 2s infinite',
-              }}
-            />
-            <div>
-              <div style={{fontSize: 11, color: '#6ee7b7', fontWeight: 600, textTransform: 'uppercase'}}>
-                Active Live Visitors
-              </div>
-              <div style={{fontSize: 20, fontWeight: 800, color: '#ecfdf5', lineHeight: 1.1}}>
-                {activeNow}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* ── Key Unified KPI Cards Across 3 Domains ── */}
       <div>
         <div
           style={{
-            fontSize: 12,
-            fontWeight: 700,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            marginBottom: 12,
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
+            justifyContent: 'space-between',
+            marginBottom: 12,
+            flexWrap: 'wrap',
+            gap: 10,
           }}
         >
-          <Sparkles size={14} color="#3b82f6" />
-          Cross-Channel Key Performance Indicators
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: '#475569',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <Sparkles size={14} color="#2563eb" />
+            Cross-Channel Key Performance Indicators
+          </div>
+
+          {activeNow > 0 && (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                borderRadius: 20,
+                padding: '4px 12px',
+                fontSize: 12,
+                fontWeight: 600,
+                color: '#065f46',
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: '#10b981',
+                  boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.3)',
+                  display: 'inline-block',
+                }}
+              />
+              <span>
+                <strong>{activeNow}</strong> live visitor{activeNow === 1 ? '' : 's'} on site
+              </span>
+            </div>
+          )}
         </div>
 
         <div
@@ -270,25 +226,62 @@ export function CombinedOverviewTab({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#3b82f6',
+                  color: '#2563eb',
                 }}
               >
                 <BarChart3 size={18} />
               </div>
-              <span style={{fontSize: 12, color: '#3b82f6', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2}}>
+              <span style={{fontSize: 12, color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2}}>
                 Explore <ArrowUpRight size={14} />
               </span>
             </div>
-            <div style={{fontSize: 15, fontWeight: 700, color: '#1e293b', marginBottom: 4}}>
+            <div style={{fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 6}}>
               Google Analytics (GA4)
             </div>
-            <p style={{margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.45}}>
+            <p style={{margin: 0, fontSize: 13, color: '#334155', lineHeight: 1.5}}>
               Detailed audience demographics, acquisition channels, device breakdown, and page views.
             </p>
           </div>
-          <div style={{marginTop: 16, paddingTop: 12, borderTop: '1px solid #f1f5f9', display: 'flex', gap: 14, fontSize: 12}}>
-            <div><span style={{color: '#94a3b8'}}>Page Views: </span><strong>{fNum(pageViews)}</strong></div>
-            <div><span style={{color: '#94a3b8'}}>Bounce: </span><strong>{fPct(bounceRate)}</strong></div>
+          <div
+            style={{
+              marginTop: 16,
+              paddingTop: 12,
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                borderRadius: 6,
+                background: '#eff6ff',
+                border: '1px solid #dbeafe',
+                fontSize: 12,
+              }}
+            >
+              <span style={{color: '#1e40af', fontWeight: 600}}>Page Views</span>
+              <span style={{color: '#0f172a', fontWeight: 750}}>{fNum(pageViews)}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                borderRadius: 6,
+                background: '#eff6ff',
+                border: '1px solid #dbeafe',
+                fontSize: 12,
+              }}
+            >
+              <span style={{color: '#1e40af', fontWeight: 600}}>Bounce</span>
+              <span style={{color: '#0f172a', fontWeight: 750}}>{fPct(bounceRate)}</span>
+            </div>
           </div>
         </div>
 
@@ -319,25 +312,62 @@ export function CombinedOverviewTab({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#8b5cf6',
+                  color: '#7c3aed',
                 }}
               >
                 <Pill size={18} />
               </div>
-              <span style={{fontSize: 12, color: '#8b5cf6', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2}}>
+              <span style={{fontSize: 12, color: '#7c3aed', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2}}>
                 Explore <ArrowUpRight size={14} />
               </span>
             </div>
-            <div style={{fontSize: 15, fontWeight: 700, color: '#1e293b', marginBottom: 4}}>
+            <div style={{fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 6}}>
               Custom Patient Funnels
             </div>
-            <p style={{margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.45}}>
+            <p style={{margin: 0, fontSize: 13, color: '#334155', lineHeight: 1.5}}>
               Patient onboarding journey, pre-consult drop-offs, condition demand, and prescription carts.
             </p>
           </div>
-          <div style={{marginTop: 16, paddingTop: 12, borderTop: '1px solid #f1f5f9', display: 'flex', gap: 14, fontSize: 12}}>
-            <div><span style={{color: '#94a3b8'}}>Condition Views: </span><strong>{fNum(conditionViews)}</strong></div>
-            <div><span style={{color: '#94a3b8'}}>Conversion: </span><strong>{conversionRate}%</strong></div>
+          <div
+            style={{
+              marginTop: 16,
+              paddingTop: 12,
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                borderRadius: 6,
+                background: '#faf5ff',
+                border: '1px solid #ede9fe',
+                fontSize: 12,
+              }}
+            >
+              <span style={{color: '#6b21a8', fontWeight: 600}}>Condition Views</span>
+              <span style={{color: '#0f172a', fontWeight: 750}}>{fNum(conditionViews)}</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                borderRadius: 6,
+                background: '#faf5ff',
+                border: '1px solid #ede9fe',
+                fontSize: 12,
+              }}
+            >
+              <span style={{color: '#6b21a8', fontWeight: 600}}>Conversion</span>
+              <span style={{color: '#0f172a', fontWeight: 750}}>{conversionRate}%</span>
+            </div>
           </div>
         </div>
 
@@ -368,25 +398,62 @@ export function CombinedOverviewTab({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#10b981',
+                  color: '#059669',
                 }}
               >
                 <Search size={18} />
               </div>
-              <span style={{fontSize: 12, color: '#10b981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2}}>
+              <span style={{fontSize: 12, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2}}>
                 Explore <ArrowUpRight size={14} />
               </span>
             </div>
-            <div style={{fontSize: 15, fontWeight: 700, color: '#1e293b', marginBottom: 4}}>
+            <div style={{fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 6}}>
               Google Search Console
             </div>
-            <p style={{margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.45}}>
+            <p style={{margin: 0, fontSize: 13, color: '#334155', lineHeight: 1.5}}>
               Organic search keywords, Google rankings, landing page search visibility, and sitemaps.
             </p>
           </div>
-          <div style={{marginTop: 16, paddingTop: 12, borderTop: '1px solid #f1f5f9', display: 'flex', gap: 14, fontSize: 12}}>
-            <div><span style={{color: '#94a3b8'}}>Avg CTR: </span><strong>{(scCtr * 100).toFixed(1)}%</strong></div>
-            <div><span style={{color: '#94a3b8'}}>Avg Position: </span><strong>{scPosition.toFixed(1)}</strong></div>
+          <div
+            style={{
+              marginTop: 16,
+              paddingTop: 12,
+              borderTop: '1px solid #e2e8f0',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                borderRadius: 6,
+                background: '#ecfdf5',
+                border: '1px solid #d1fae5',
+                fontSize: 12,
+              }}
+            >
+              <span style={{color: '#065f46', fontWeight: 600}}>Avg CTR</span>
+              <span style={{color: '#0f172a', fontWeight: 750}}>{(scCtr * 100).toFixed(1)}%</span>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                borderRadius: 6,
+                background: '#ecfdf5',
+                border: '1px solid #d1fae5',
+                fontSize: 12,
+              }}
+            >
+              <span style={{color: '#065f46', fontWeight: 600}}>Avg Position</span>
+              <span style={{color: '#0f172a', fontWeight: 750}}>{scPosition.toFixed(1)}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -537,7 +604,7 @@ export function CombinedOverviewTab({
                   </span>
                   <div style={{display: 'flex', gap: 12, fontSize: 12, flexShrink: 0}}>
                     <span style={{color: '#10b981', fontWeight: 700}}>{q.clicks} clicks</span>
-                    <span style={{color: '#94a3b8'}}>Pos #{q.position.toFixed(1)}</span>
+                    <span style={{color: '#475569', fontWeight: 600}}>Pos #{q.position.toFixed(1)}</span>
                   </div>
                 </div>
               ))}
@@ -553,7 +620,7 @@ export function CombinedOverviewTab({
           {loadingGa ? (
             <SkeletonChart height={180} />
           ) : (gaData?.topPages ?? []).length === 0 ? (
-            <div style={{padding: '30px 0', textAlign: 'center', color: '#94a3b8', fontSize: 13}}>
+            <div style={{padding: '30px 0', textAlign: 'center', color: '#64748b', fontSize: 13}}>
               No page view records found.
             </div>
           ) : (
@@ -576,7 +643,7 @@ export function CombinedOverviewTab({
                   </span>
                   <div style={{display: 'flex', gap: 12, fontSize: 12, flexShrink: 0}}>
                     <span style={{color: '#3b82f6', fontWeight: 700}}>{fNum(p.pageViews)} views</span>
-                    <span style={{color: '#94a3b8'}}>{fNum(p.users)} users</span>
+                    <span style={{color: '#475569', fontWeight: 600}}>{fNum(p.users)} users</span>
                   </div>
                 </div>
               ))}

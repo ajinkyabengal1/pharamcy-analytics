@@ -73,7 +73,7 @@ export function SectionLabel({children}: {children: React.ReactNode}) {
       style={{
         fontSize: 11,
         fontWeight: 700,
-        color: '#94a3b8',
+        color: '#475569',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
         marginBottom: 14,
@@ -317,8 +317,8 @@ export function MetricCard({
         <span
           style={{
             fontSize: 11,
-            color: '#94a3b8',
-            fontWeight: 600,
+            color: '#475569',
+            fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: '0.06em',
             flex: 1,
@@ -340,7 +340,7 @@ export function MetricCard({
           >
             {value}
           </div>
-          {sub && <div style={{fontSize: 12, color: '#94a3b8', marginTop: 3}}>{sub}</div>}
+          {sub && <div style={{fontSize: 12, color: '#64748b', fontWeight: 500, marginTop: 3}}>{sub}</div>}
         </>
       )}
     </div>

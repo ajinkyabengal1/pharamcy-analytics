@@ -5,7 +5,6 @@ import {
   Pill,
   Search,
   RefreshCw,
-  AlertCircle,
   ExternalLink,
 } from 'lucide-react'
 import type {AnalyticsData, DateRange} from '../ga-types'
@@ -68,7 +67,6 @@ export interface UnifiedDashboardProps {
   brandName?: string
 }
 
-const SIDEBAR_HEIGHT = 'calc(100vh - 54px)'
 
 const GA_SUB_TABS = [
   {id: 'overview', label: 'Overview', icon: '▦'},
@@ -222,14 +220,20 @@ export function UnifiedDashboard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: 'calc(100vh - 52px)',
+        maxHeight: 'calc(100vh - 52px)',
         background: '#f8fafc',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
       <style>{GLOBAL_CSS}</style>
       <style>{`
+        .ad-shell {
+          height: 100% !important;
+          max-height: 100% !important;
+        }
         .ad-center-pill {
           display: inline-flex;
           align-items: center;
@@ -295,6 +299,8 @@ export function UnifiedDashboard({
           padding: '0 20px',
           zIndex: 20,
           flexShrink: 0,
+          position: 'sticky',
+          top: 0,
         }}
       >
         {/* Left: Branding */}
@@ -479,7 +485,7 @@ export function UnifiedDashboard({
           MAIN BODY LAYOUT
          ═══════════════════════════════════════════════════════════════════════ */}
       {activeMainSection === 'search-console' ? (
-        <div style={{flex: 1, height: SIDEBAR_HEIGHT, overflow: 'hidden'}}>
+        <div style={{flex: 1, minHeight: 0, overflow: 'hidden'}}>
           <SearchConsoleDashboard
             apiUrl={effectiveScUrl}
             initialTab={scActiveTab}
@@ -488,7 +494,7 @@ export function UnifiedDashboard({
           />
         </div>
       ) : (
-        <div style={{display: 'flex', flex: 1, height: SIDEBAR_HEIGHT, overflow: 'hidden'}}>
+        <div style={{display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden'}}>
         {/* ── SIDEBAR ── */}
         <aside
           style={{
@@ -759,6 +765,7 @@ export function UnifiedDashboard({
         <main
           style={{
             flex: 1,
+            minHeight: 0,
             overflowY: 'auto',
             padding: '24px 28px',
           }}
@@ -781,27 +788,7 @@ export function UnifiedDashboard({
               </div>
             </div>
 
-            {/* Config alert pill if error */}
-            {(gaError || scError) && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  borderRadius: 8,
-                  padding: '6px 12px',
-                  fontSize: 12,
-                  color: '#b91c1c',
-                }}
-              >
-                <AlertCircle size={14} />
-                <span>
-                  {gaError ? `GA4: ${gaError}` : `Search Console: ${scError}`}
-                </span>
-              </div>
-            )}
+
           </div>
 
           {/* ══ VIEW RENDERING ══ */}

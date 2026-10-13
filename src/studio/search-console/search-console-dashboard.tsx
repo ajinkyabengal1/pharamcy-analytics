@@ -2,8 +2,6 @@ import {useCallback, useEffect, useState} from 'react'
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Legend,
   ResponsiveContainer,
@@ -35,7 +33,6 @@ import {
   InitialLoading,
   MetricCard,
   MetricGrid,
-  PALETTE,
   Panel,
   PathCell,
   SC_ACCENT,
@@ -458,6 +455,7 @@ export function ScSitemapsTab({
   const fTimeAgo = (iso: string) => {
     if (!iso) return ''
     try {
+      // eslint-disable-next-line react-hooks/purity -- relative-time label, recomputed each render on purpose
       const diff = Date.now() - new Date(iso).getTime()
       const mins = Math.floor(diff / 60000)
       if (mins < 60) return `${mins}m ago`

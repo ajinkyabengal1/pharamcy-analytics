@@ -48,7 +48,7 @@
     "build": "tsup",
     "prepare": "tsup",
     "dev": "tsup --watch",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
@@ -69,22 +69,30 @@
     "sanity": "^3.0.0 || ^4.0.0 || ^5.0.0"
   },
   "peerDependenciesMeta": {
-    "next": { "optional": true },
-    "sanity": { "optional": true }
+    "next": {
+      "optional": true
+    },
+    "sanity": {
+      "optional": true
+    }
   },
   "dependencies": {
+    "@sanity/icons": "^3.7.0",
     "jose": "^6.0.11",
-    "mixpanel-browser": "^2.78.0",
-    "recharts": "^2.15.0 || ^3.0.0",
     "lucide-react": "^0.487.0",
-    "@sanity/icons": "^3.7.0"
+    "mixpanel-browser": "^2.78.0",
+    "recharts": "^2.15.0 || ^3.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/node": "^22.14.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "tsup": "^8.4.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.71.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

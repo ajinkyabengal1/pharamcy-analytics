@@ -77,7 +77,7 @@ export function ConditionsProductsTab({dateRange}: {apiUrl?: string; dateRange: 
   const [data, setData] = useState<TopEntitiesResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [fetchTick, setFetchTick] = useState(0)
+  const [fetchTick] = useState(0)
 
   const [topConditionSearches, setTopConditionSearches] = useState<TopSearchesResponse | null>(null)
   const [topConditionSearchesLoading, setTopConditionSearchesLoading] = useState(true)
