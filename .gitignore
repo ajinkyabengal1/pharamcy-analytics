@@ -4,3 +4,6 @@ dist/
 *.log
 .env
 .env.*
+
+# local test tarballs (pnpm pack)
+*.tgz

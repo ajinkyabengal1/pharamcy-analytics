@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Unified analytics package for pharmacy platforms: Google Analytics 4, Mixpanel funnels, and Google Search Console with Sanity Studio dashboards.",
   "repository": { "type": "git", "url": "git+https://github.com/ajinkyabengal1/pharamcy-analytics.git" },
-  "publishConfig": { "access": "public" },
+  "publishConfig": { "registry": "https://npm.pkg.github.com" },
   "engines": { "node": ">=20" },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
