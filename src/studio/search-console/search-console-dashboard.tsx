@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import type {ScDateRange, SearchConsoleData} from './search-console-types'
 import {fetchSearchConsoleData} from './sc-api'
+import {formatDateTick, formatTooltipDate, evenTickInterval} from '../components/ga-constants'
 import {
   CHART_GRID,
   CHART_TICK,
@@ -172,9 +173,20 @@ export function ScOverviewTab({data, loading}: {data: SearchConsoleData; loading
                   ))}
                 </defs>
                 <CartesianGrid strokeDasharray="4 6" stroke={CHART_GRID} />
-                <XAxis dataKey="displayDate" {...chartAxis} />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={formatDateTick}
+                  minTickGap={28}
+                  interval={evenTickInterval(clicksSeries?.length ?? 0)}
+                  padding={{left: 2, right: 15}}
+                  {...chartAxis}
+                />
                 <YAxis {...chartAxis} width={38} />
-                <Tooltip contentStyle={chartTooltipStyle} cursor={{stroke: '#cbd5e1', strokeDasharray: '4 4'}} />
+                <Tooltip
+                  labelFormatter={formatTooltipDate}
+                  contentStyle={chartTooltipStyle}
+                  cursor={{stroke: '#cbd5e1', strokeDasharray: '4 4'}}
+                />
                 <Legend wrapperStyle={{fontSize: 12, fontWeight: 700, paddingTop: 10}} />
                 <Area type="monotone" dataKey="clicks" name="Clicks" stroke="#0f9f6e" fill="url(#scClicks)" strokeWidth={2.4} dot={false} />
                 <Area type="monotone" dataKey="impressions" name="Impressions" stroke="#6366f1" fill="url(#scImpressions)" strokeWidth={2.4} dot={false} />

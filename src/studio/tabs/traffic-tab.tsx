@@ -13,7 +13,7 @@ import {
   Legend,
 } from 'recharts'
 import type {AnalyticsData} from '../ga-types'
-import {SECTION_INFO, PALETTE, CHANNEL_COLORS} from '../components/ga-constants'
+import {SECTION_INFO, PALETTE, CHANNEL_COLORS, formatDateTick, formatTooltipDate, evenTickInterval} from '../components/ga-constants'
 import {Panel, SkeletonChart} from '../components/shared-ui'
 
 export function TrafficTab({data, loading}: {data: AnalyticsData; loading?: boolean}) {
@@ -51,7 +51,11 @@ export function TrafficTab({data, loading}: {data: AnalyticsData; loading?: bool
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis
-                  dataKey="displayDate"
+                  dataKey="date"
+                  tickFormatter={formatDateTick}
+                  minTickGap={28}
+                  interval={evenTickInterval(data.timeSeries?.length ?? 0)}
+                  padding={{left: 2, right: 15}}
                   fontSize={11}
                   tick={{fill: '#94a3b8'}}
                   axisLine={false}
@@ -65,6 +69,7 @@ export function TrafficTab({data, loading}: {data: AnalyticsData; loading?: bool
                   width={36}
                 />
                 <Tooltip
+                  labelFormatter={formatTooltipDate}
                   contentStyle={{
                     background: '#fff',
                     border: '1px solid #e2e8f0',

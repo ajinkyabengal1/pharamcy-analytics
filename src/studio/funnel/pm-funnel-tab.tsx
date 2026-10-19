@@ -784,7 +784,8 @@ function FlowTab({label, icon, desc, active, onClick}: {label: string; icon: str
 
 // ── Main component ────────────────────────────────────────────────────────
 
-export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
+export function PmFunnelTab({apiUrl, dateRange}: {apiUrl?: string; dateRange: string}) {
+  const targetUrl = apiUrl || MIXPANEL_API_URL
   const [flowSource, setFlowSource] = useState<FlowSource>('product_detail')
   const [refreshKey, setRefreshKey] = useState(0)
   const [clearing, setClearing] = useState(false)
@@ -823,14 +824,14 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
   const handleFetchLatest = useCallback(async () => {
     setClearing(true)
     try {
-      await clearMixpanelCache(MIXPANEL_API_URL)
+      await clearMixpanelCache(targetUrl)
     } catch (err) {
       console.error('PM funnel clear-cache error:', err)
     } finally {
       setClearing(false)
       setRefreshKey((k) => k + 1)
     }
-  }, [])
+  }, [targetUrl])
 
   // ── Product detail: load options ──
   useEffect(() => {
@@ -839,7 +840,7 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setPdOptionsLoading(true)
     setPdSelectedFilter('')
     setPdEventsData(null)
-    fetchPmFunnelProducts(MIXPANEL_API_URL, dateRange as DateRange, 'product_detail', controller.signal)
+    fetchPmFunnelProducts(targetUrl, dateRange as DateRange, 'product_detail', controller.signal)
       .then((values) => { if (!controller.signal.aborted) { setPdFilterOptions(values); setPdOptionsLoading(false) } })
       .catch((err) => {
         if (err instanceof Error && err.name === 'AbortError') return
@@ -847,7 +848,7 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
         if (!controller.signal.aborted) setPdOptionsLoading(false)
       })
     return () => controller.abort()
-  }, [dateRange, flowSource, refreshKey])
+  }, [targetUrl, dateRange, flowSource, refreshKey])
 
   // ── Product detail: fetch events ──
   useEffect(() => {
@@ -855,14 +856,14 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     const controller = new AbortController()
     setPdLoading(true)
     setPdError(null)
-    fetchPmFunnelEvents(MIXPANEL_API_URL, dateRange as DateRange, pdSelectedFilter, 'product_detail', controller.signal)
+    fetchPmFunnelEvents(targetUrl, dateRange as DateRange, pdSelectedFilter, 'product_detail', controller.signal)
       .then((data) => { if (!controller.signal.aborted) { setPdEventsData(data); setPdLoading(false) } })
       .catch((err) => {
         if (err instanceof Error && err.name === 'AbortError') return
         if (!controller.signal.aborted) { setPdError(err instanceof Error ? err.message : String(err)); setPdLoading(false) }
       })
     return () => controller.abort()
-  }, [pdSelectedFilter, dateRange, flowSource, refreshKey])
+  }, [targetUrl, pdSelectedFilter, dateRange, flowSource, refreshKey])
 
   // ── Condition detail: load condition options (IDs from Mixpanel, names from Sanity) ──
   useEffect(() => {
@@ -874,7 +875,7 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setCdSelectedProduct(null)
     setCdCartData(null)
     Promise.all([
-      fetchPmConditionOptions(MIXPANEL_API_URL, dateRange as DateRange, controller.signal),
+      fetchPmConditionOptions(targetUrl, dateRange as DateRange, controller.signal),
       sanityClient.fetch<{conditionId: number; title: string}[]>(
         `*[_type == "singleCondition" && defined(conditionId)]{conditionId, title}`
       ),
@@ -896,7 +897,7 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
         if (!controller.signal.aborted) setCdOptionsLoading(false)
       })
     return () => controller.abort()
-  }, [dateRange, flowSource, refreshKey])
+  }, [targetUrl, dateRange, flowSource, refreshKey])
 
   // ── Condition detail: fetch condition-level funnel ──
   useEffect(() => {
@@ -912,14 +913,14 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setCdConditionError(null)
     setCdSelectedProduct(null)
     setCdCartData(null)
-    fetchPmConditionEvents(MIXPANEL_API_URL, dateRange as DateRange, Number(cdSelectedConditionId), controller.signal)
+    fetchPmConditionEvents(targetUrl, dateRange as DateRange, Number(cdSelectedConditionId), controller.signal)
       .then((data) => { if (!controller.signal.aborted) { setCdConditionData(data); setCdConditionLoading(false) } })
       .catch((err) => {
         if (err instanceof Error && err.name === 'AbortError') return
         if (!controller.signal.aborted) { setCdConditionError(err instanceof Error ? err.message : String(err)); setCdConditionLoading(false) }
       })
     return () => controller.abort()
-  }, [cdSelectedConditionId, dateRange, flowSource, refreshKey])
+  }, [targetUrl, cdSelectedConditionId, dateRange, flowSource, refreshKey])
 
   // ── Condition detail: fetch cart funnel for selected product ──
   const handleProductSelect = useCallback((productName: string) => {
@@ -927,10 +928,10 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setCdSelectedProduct(productName)
     setCdCartData(null)
     setCdCartLoading(true)
-    fetchPmProductCart(MIXPANEL_API_URL, dateRange as DateRange, Number(cdSelectedConditionId), productName)
+    fetchPmProductCart(targetUrl, dateRange as DateRange, Number(cdSelectedConditionId), productName)
       .then((data) => { setCdCartData(data); setCdCartLoading(false) })
       .catch((err) => { console.error('PM funnel cart error:', err); setCdCartLoading(false) })
-  }, [cdSelectedConditionId, cdSelectedProduct, dateRange])
+  }, [targetUrl, cdSelectedConditionId, cdSelectedProduct, dateRange])
 
   // ── Cart auth patient modal handlers ──
   const handlePdCartAuthClick = useCallback(() => {
@@ -939,10 +940,10 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setCartAuthPatientsLoading(true)
     setCartAuthPatientsError(null)
     setCartAuthPatients([])
-    fetchCartAuthPatients(MIXPANEL_API_URL, dateRange as DateRange, {flowSource: 'product_detail', product: pdSelectedFilter})
+    fetchCartAuthPatients(targetUrl, dateRange as DateRange, {flowSource: 'product_detail', product: pdSelectedFilter})
       .then((records) => { setCartAuthPatients(records); setCartAuthPatientsLoading(false) })
       .catch((err) => { setCartAuthPatientsError(err instanceof Error ? err.message : String(err)); setCartAuthPatientsLoading(false) })
-  }, [pdSelectedFilter, dateRange])
+  }, [targetUrl, pdSelectedFilter, dateRange])
 
   const handleCdCartAuthClick = useCallback(() => {
     if (!cdSelectedProduct || !cdSelectedConditionId) return
@@ -950,10 +951,10 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setCartAuthPatientsLoading(true)
     setCartAuthPatientsError(null)
     setCartAuthPatients([])
-    fetchCartAuthPatients(MIXPANEL_API_URL, dateRange as DateRange, {flowSource: 'condition_detail', product: cdSelectedProduct, conditionId: Number(cdSelectedConditionId)})
+    fetchCartAuthPatients(targetUrl, dateRange as DateRange, {flowSource: 'condition_detail', product: cdSelectedProduct, conditionId: Number(cdSelectedConditionId)})
       .then((records) => { setCartAuthPatients(records); setCartAuthPatientsLoading(false) })
       .catch((err) => { setCartAuthPatientsError(err instanceof Error ? err.message : String(err)); setCartAuthPatientsLoading(false) })
-  }, [cdSelectedConditionId, cdSelectedProduct, dateRange])
+  }, [targetUrl, cdSelectedConditionId, cdSelectedProduct, dateRange])
 
   // ── Auth patient modal handlers ──
   const handlePdAuthClick = useCallback(() => {
@@ -962,10 +963,10 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setAuthPatientsLoading(true)
     setAuthPatientsError(null)
     setAuthPatients([])
-    fetchAuthPatients(MIXPANEL_API_URL, dateRange as DateRange, {flowSource: 'product_detail', product: pdSelectedFilter})
+    fetchAuthPatients(targetUrl, dateRange as DateRange, {flowSource: 'product_detail', product: pdSelectedFilter})
       .then((records) => { setAuthPatients(records); setAuthPatientsLoading(false) })
       .catch((err) => { setAuthPatientsError(err instanceof Error ? err.message : String(err)); setAuthPatientsLoading(false) })
-  }, [pdSelectedFilter, dateRange])
+  }, [targetUrl, pdSelectedFilter, dateRange])
 
   const handleCdAuthClick = useCallback(() => {
     if (!cdSelectedConditionId) return
@@ -973,10 +974,10 @@ export function PmFunnelTab({dateRange}: {apiUrl: string; dateRange: string}) {
     setAuthPatientsLoading(true)
     setAuthPatientsError(null)
     setAuthPatients([])
-    fetchAuthPatients(MIXPANEL_API_URL, dateRange as DateRange, {flowSource: 'condition_detail', conditionId: Number(cdSelectedConditionId)})
+    fetchAuthPatients(targetUrl, dateRange as DateRange, {flowSource: 'condition_detail', conditionId: Number(cdSelectedConditionId)})
       .then((records) => { setAuthPatients(records); setAuthPatientsLoading(false) })
       .catch((err) => { setAuthPatientsError(err instanceof Error ? err.message : String(err)); setAuthPatientsLoading(false) })
-  }, [cdSelectedConditionId, dateRange])
+  }, [targetUrl, cdSelectedConditionId, dateRange])
 
   // ── Product detail summary stats ──
   const pdFunnelEvents = [...PM_PRODUCT_DETAIL_EVENTS]

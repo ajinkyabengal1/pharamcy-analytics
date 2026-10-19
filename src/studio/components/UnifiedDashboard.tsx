@@ -64,6 +64,7 @@ export type UnifiedTabId =
 export interface UnifiedDashboardProps {
   apiUrl?: string
   scApiUrl?: string
+  mixpanelApiUrl?: string
   brandName?: string
 }
 
@@ -104,6 +105,7 @@ function mapToScRange(range: DateRange): ScDateRange {
 export function UnifiedDashboard({
   apiUrl = '/api/analytics',
   scApiUrl,
+  mixpanelApiUrl,
   brandName = 'Pharmacy Analytics',
 }: UnifiedDashboardProps) {
   // Main center section: 'all' | 'analytics' | 'custom' | 'search-console'
@@ -118,6 +120,8 @@ export function UnifiedDashboard({
   const [gaOpen, setGaOpen] = useState(true)
   const [customOpen, setCustomOpen] = useState(true)
   const [scOpen, setScOpen] = useState(true)
+  // Collapsible sidebar groups only make sense in the combined 'All' view.
+  const isAll = activeMainSection === 'all'
 
   // Data states
   const [gaData, setGaData] = useState<AnalyticsData | null>(null)
@@ -539,6 +543,7 @@ export function UnifiedDashboard({
             {(activeMainSection === 'all' || activeMainSection === 'analytics') && (
               <div style={{marginBottom: 14}}>
                 <button
+                  disabled={!isAll}
                   onClick={() => setGaOpen((o) => !o)}
                   style={{
                     display: 'flex',
@@ -549,7 +554,7 @@ export function UnifiedDashboard({
                     borderRadius: 6,
                     background: 'transparent',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: isAll ? 'pointer' : 'default',
                     marginBottom: 2,
                   }}
                 >
@@ -567,10 +572,10 @@ export function UnifiedDashboard({
                   >
                     Google Analytics
                   </span>
-                  <span style={{fontSize: 11, color: '#94a3b8'}}>{gaOpen ? '▾' : '▸'}</span>
+                  <span style={{fontSize: 11, color: '#94a3b8'}}>{isAll ? (gaOpen ? '▾' : '▸') : null}</span>
                 </button>
 
-                {gaOpen &&
+                {(gaOpen || !isAll) &&
                   GA_SUB_TABS.map((tab) => {
                     const active = activeTab === tab.id
                     return (
@@ -605,6 +610,7 @@ export function UnifiedDashboard({
             {(activeMainSection === 'all' || activeMainSection === 'custom') && (
               <div style={{marginBottom: 14}}>
                 <button
+                  disabled={!isAll}
                   onClick={() => setCustomOpen((o) => !o)}
                   style={{
                     display: 'flex',
@@ -615,7 +621,7 @@ export function UnifiedDashboard({
                     borderRadius: 6,
                     background: 'transparent',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: isAll ? 'pointer' : 'default',
                     marginBottom: 2,
                   }}
                 >
@@ -633,10 +639,10 @@ export function UnifiedDashboard({
                   >
                     Custom Analytics
                   </span>
-                  <span style={{fontSize: 11, color: '#94a3b8'}}>{customOpen ? '▾' : '▸'}</span>
+                  <span style={{fontSize: 11, color: '#94a3b8'}}>{isAll ? (customOpen ? '▾' : '▸') : null}</span>
                 </button>
 
-                {customOpen &&
+                {(customOpen || !isAll) &&
                   CUSTOM_SUB_TABS.map((tab) => {
                     const active = activeTab === tab.id
                     return (
@@ -671,6 +677,7 @@ export function UnifiedDashboard({
             {activeMainSection === 'all' && (
               <div style={{marginBottom: 14}}>
                 <button
+                  disabled={!isAll}
                   onClick={() => setScOpen((o) => !o)}
                   style={{
                     display: 'flex',
@@ -681,7 +688,7 @@ export function UnifiedDashboard({
                     borderRadius: 6,
                     background: 'transparent',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: isAll ? 'pointer' : 'default',
                     marginBottom: 2,
                   }}
                 >
@@ -699,10 +706,10 @@ export function UnifiedDashboard({
                   >
                     Search Console
                   </span>
-                  <span style={{fontSize: 11, color: '#94a3b8'}}>{scOpen ? '▾' : '▸'}</span>
+                  <span style={{fontSize: 11, color: '#94a3b8'}}>{isAll ? (scOpen ? '▾' : '▸') : null}</span>
                 </button>
 
-                {scOpen &&
+                {(scOpen || !isAll) &&
                   SC_SUB_TABS.map((tab) => {
                     const isScActive = activeTab === tab.id
                     return (
@@ -767,6 +774,7 @@ export function UnifiedDashboard({
             flex: 1,
             minHeight: 0,
             overflowY: 'auto',
+            overflowX: 'hidden',
             padding: '24px 28px',
           }}
         >
@@ -844,13 +852,13 @@ export function UnifiedDashboard({
 
           {/* 3. Custom Analytics Tabs */}
           {activeTab === 'conditions-products' && (
-            <ConditionsProductsTab apiUrl={apiUrl} dateRange={dateRange} />
+            <ConditionsProductsTab apiUrl={mixpanelApiUrl} dateRange={dateRange} />
           )}
           {activeTab === 'funnel' && (
-            <FunnelEventsTab apiUrl={apiUrl} dateRange={dateRange} />
+            <FunnelEventsTab apiUrl={mixpanelApiUrl} dateRange={dateRange} />
           )}
           {activeTab === 'pm-funnel' && (
-            <PmFunnelTab apiUrl={apiUrl} dateRange={dateRange} />
+            <PmFunnelTab apiUrl={mixpanelApiUrl} dateRange={dateRange} />
           )}
 
           {/* 4. Google Search Console Tabs (Full Strachans UI) */}

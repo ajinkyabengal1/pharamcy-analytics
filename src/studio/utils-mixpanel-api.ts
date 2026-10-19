@@ -393,6 +393,30 @@ export interface TopEntitiesResponse {
 }
 
 /**
+ * Read a JSON API response, turning error bodies and HTML pages (missing route, proxy error)
+ * into readable errors.
+ */
+async function parseJsonResponse<T = any>(res: Response, label: string, url: string): Promise<T> {
+  const text = await res.text()
+  if (!res.ok) {
+    let msg = `${label} API error: ${res.status} ${res.statusText}`
+    try {
+      const err = JSON.parse(text)
+      if (err?.error) msg = err.error
+    } catch {
+      // body wasn't JSON; keep the status message
+    }
+    throw new Error(msg)
+  }
+  if (/^\s*<(!doctype|html)/i.test(text)) {
+    throw new Error(
+      `${label} API (${url}) returned HTML instead of JSON. Check the Mixpanel API URL (mixpanelApiUrl) points at the /api/mixpanel route.`,
+    )
+  }
+  return JSON.parse(text) as T
+}
+
+/**
  * Fetch top conditions & products with per-event counts from Mixpanel.
  * Optionally narrow results to a specific condition or product name.
  */
@@ -406,14 +430,7 @@ export async function fetchTopEntities(
   if (opts?.condition) url += `&condition=${encodeURIComponent(opts.condition)}`
   if (opts?.product) url += `&product=${encodeURIComponent(opts.product)}`
   const res = await fetch(url, {cache: 'no-store', signal})
-  if (!res.ok) {
-    const err = await res.json().catch(() => null)
-    throw new Error(
-      (err as {error?: string})?.error ||
-        `Top entities API error: ${res.status} ${res.statusText}`,
-    )
-  }
-  const json = await res.json()
+  const json = await parseJsonResponse(res, 'Top entities', url)
   return {
     conditions: (json.conditions ?? []) as ConditionStat[],
     products: (json.products ?? []) as ProductStat[],
@@ -437,14 +454,7 @@ export async function fetchTopSearches(
 ): Promise<TopSearchesResponse> {
   const url = `${apiUrl}?mode=top-searches&dateRange=${dateRange}&type=${type}`
   const res = await fetch(url, { cache: 'no-store', signal })
-  if (!res.ok) {
-    const err = await res.json().catch(() => null)
-    throw new Error(
-      (err as { error?: string })?.error ||
-        `Top searches API error: ${res.status} ${res.statusText}`,
-    )
-  }
-  const json = await res.json()
+  const json = await parseJsonResponse(res, 'Top searches', url)
   return { topSearches: (json.topSearches ?? []) as Array<{ term: string; count: number }> }
 }
 

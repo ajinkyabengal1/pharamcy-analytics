@@ -1,14 +1,80 @@
-import React from 'react'
+import React, {useState, useRef} from 'react'
+import {createPortal} from 'react-dom'
 import {PieChart, Pie, Cell, ResponsiveContainer, Tooltip} from 'recharts'
 import {fNum} from './ga-constants'
 
 export function InfoIcon({text}: {text: string}) {
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const [tip, setTip] = useState<{top: number; left: number; placement: 'top' | 'bottom'} | null>(null)
+
+  const show = () => {
+    const el = triggerRef.current
+    if (!el || typeof window === 'undefined') return
+    const rect = el.getBoundingClientRect()
+    const placeBelow = rect.top < 100
+    const tipWidth = 230
+    const pad = 12
+    const centerX = rect.left + rect.width / 2
+    const clampedLeft = Math.max(
+      tipWidth / 2 + pad,
+      Math.min(centerX, window.innerWidth - tipWidth / 2 - pad)
+    )
+
+    setTip({
+      top: placeBelow ? rect.bottom + 8 : rect.top - 8,
+      left: clampedLeft,
+      placement: placeBelow ? 'bottom' : 'top',
+    })
+  }
+
+  const hide = () => setTip(null)
+
   return (
-    <span className="ga-tooltip-wrap">
-      <button className="ga-info-btn" tabIndex={-1}>
+    <span
+      className="ga-tooltip-wrap"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      style={{position: 'relative', display: 'inline-flex', alignItems: 'center'}}
+    >
+      <button
+        ref={triggerRef}
+        className="ga-info-btn"
+        tabIndex={-1}
+        type="button"
+        onFocus={show}
+        onBlur={hide}
+      >
         i
       </button>
-      <span className="ga-tip">{text}</span>
+      {tip &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            style={{
+              position: 'fixed',
+              top: tip.top,
+              left: tip.left,
+              transform: tip.placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
+              width: 230,
+              background: '#0f172a',
+              color: '#f8fafc',
+              fontSize: 12,
+              lineHeight: 1.45,
+              padding: '8px 12px',
+              borderRadius: 8,
+              boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2)',
+              border: '1px solid #334155',
+              pointerEvents: 'none',
+              zIndex: 99999,
+              wordWrap: 'break-word',
+              whiteSpace: 'normal',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            }}
+          >
+            {text}
+          </div>,
+          document.body
+        )}
     </span>
   )
 }

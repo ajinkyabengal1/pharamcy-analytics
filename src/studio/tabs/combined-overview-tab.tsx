@@ -18,7 +18,7 @@ import {
 import type {AnalyticsData} from '../ga-types'
 import type {SearchConsoleData} from '../search-console/search-console-types'
 import {MetricCard, Panel, SkeletonChart} from '../components/shared-ui'
-import {fNum, fPct} from '../components/ga-constants'
+import {fNum, fPct, formatDateTick, formatTooltipDate, evenTickInterval} from '../components/ga-constants'
 
 export interface CombinedOverviewTabProps {
   gaData: AnalyticsData | null
@@ -484,13 +484,17 @@ export function CombinedOverviewTab({
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={(v: string) => v.slice(5).replace('-', '/')}
+                    tickFormatter={formatDateTick}
+                    minTickGap={28}
+                    interval={evenTickInterval(scTimeSeries?.length ?? 0)}
+                    padding={{left: 2, right: 15}}
                     tick={{fontSize: 10, fill: '#94a3b8'}}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis tick={{fontSize: 10, fill: '#94a3b8'}} axisLine={false} tickLine={false} />
                   <Tooltip
+                    labelFormatter={formatTooltipDate}
                     contentStyle={{
                       background: '#1e293b',
                       border: 'none',
@@ -538,15 +542,17 @@ export function CombinedOverviewTab({
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={(v: string) =>
-                      v.length === 8 ? `${v.slice(4, 6)}/${v.slice(6, 8)}` : v
-                    }
+                    tickFormatter={formatDateTick}
+                    minTickGap={28}
+                    interval={evenTickInterval(gaTimeSeries?.length ?? 0)}
+                    padding={{left: 2, right: 15}}
                     tick={{fontSize: 10, fill: '#94a3b8'}}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis tick={{fontSize: 10, fill: '#94a3b8'}} axisLine={false} tickLine={false} />
                   <Tooltip
+                    labelFormatter={formatTooltipDate}
                     contentStyle={{
                       background: '#1e293b',
                       border: 'none',

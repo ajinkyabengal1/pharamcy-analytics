@@ -115,6 +115,7 @@ export type {
 export interface PharmacyAnalyticsPluginConfig {
   apiUrl?: string
   scApiUrl?: string
+  mixpanelApiUrl?: string
   title?: string
   name?: string
   icon?: React.ComponentType
@@ -154,6 +155,7 @@ export function pharmacyAnalyticsPlugin(config: PharmacyAnalyticsPluginConfig = 
             <UnifiedDashboard
               apiUrl={config.apiUrl || '/api/analytics'}
               scApiUrl={config.scApiUrl}
+              mixpanelApiUrl={config.mixpanelApiUrl}
               brandName={toolTitle}
             />
           )

@@ -1277,7 +1277,43 @@ export function createAnalyticsApiHandler(config?: AnalyticsServerConfig) {
     }
   };
 
-  return { GET: getHandler, POST: postHandler };
+  // CORS is opt-in: without `corsOrigin` no headers are sent, so the route stays same-origin only.
+  const corsHeaders = (): Record<string, string> =>
+    config?.corsOrigin
+      ? {
+          "Access-Control-Allow-Origin": config.corsOrigin,
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Max-Age": "86400",
+          Vary: "Origin",
+        }
+      : {};
+
+  const optionsHandler = async (): Promise<Response> =>
+    new Response(null, { status: 204, headers: corsHeaders() });
+
+  const withCors =
+    (handler: (req: Request) => Promise<Response>) =>
+    async (req: Request): Promise<Response> => {
+      let res: Response;
+      try {
+        res = await handler(req);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        res = Response.json({ error: msg }, { status: 500 });
+      }
+      const extra = corsHeaders();
+      if (!Object.keys(extra).length) return res;
+      const headers = new Headers(res.headers);
+      for (const [k, v] of Object.entries(extra)) headers.set(k, v);
+      return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+    };
+
+  return {
+    GET: withCors(getHandler),
+    POST: withCors(postHandler),
+    OPTIONS: optionsHandler,
+  };
 }
 
 /* ─── Default Exported Route Handlers ────────────────────────────────────── */
@@ -1285,3 +1321,4 @@ export function createAnalyticsApiHandler(config?: AnalyticsServerConfig) {
 const defaultHandlers = createAnalyticsApiHandler();
 export const GET = defaultHandlers.GET;
 export const POST = defaultHandlers.POST;
+export const OPTIONS = defaultHandlers.OPTIONS;

@@ -979,11 +979,16 @@ export function InfoIcon({text}: {text: string}) {
     const el = triggerRef.current
     if (!el) return
     const rect = el.getBoundingClientRect()
-    // Flip below the trigger when there is not enough room above (e.g. under the sticky topbar).
     const placeBelow = rect.top < 120
+    const tipWidth = 230
+    const pad = 12
+    const centerX = rect.left + rect.width / 2
+    const clampedLeft = typeof window !== 'undefined'
+      ? Math.max(tipWidth / 2 + pad, Math.min(centerX, window.innerWidth - tipWidth / 2 - pad))
+      : centerX
     setTip({
       top: placeBelow ? rect.bottom + 8 : rect.top - 8,
-      left: rect.left + rect.width / 2,
+      left: clampedLeft,
       placement: placeBelow ? 'bottom' : 'top',
     })
   }

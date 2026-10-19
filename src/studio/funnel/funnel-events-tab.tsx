@@ -11,7 +11,8 @@ import {FunnelCard} from './funnel-card'
 
 // High-field pharmacy has a single site — no branch_corporate_id concept.
 // Conditions are fetched directly on mount (no branch filter needed).
-export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}) {
+export function FunnelEventsTab({apiUrl, dateRange}: {apiUrl?: string; dateRange: string}) {
+  const targetUrl = apiUrl || MIXPANEL_API_URL
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
@@ -42,7 +43,7 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
     if (!selectedCondition) return
     setPatientsLoading(true)
     setPatientsError(null)
-    fetchSignupPatients(MIXPANEL_API_URL, dateRange as DateRange, selectedCondition)
+    fetchSignupPatients(targetUrl, dateRange as DateRange, selectedCondition)
       .then((records) => {
         setPatientRecords(records)
         setPatientsLoading(false)
@@ -52,7 +53,7 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
         setPatientsError(err instanceof Error ? err.message : String(err))
         setPatientsLoading(false)
       })
-  }, [dateRange, selectedCondition])
+  }, [targetUrl, dateRange, selectedCondition])
 
   const handleSignupCountClick = useCallback(() => {
     if (!selectedCondition) return
@@ -100,7 +101,7 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
     const controller = new AbortController()
     setConditionsLoading(true)
     setSelectedCondition('')
-    fetchFunnelConditions(MIXPANEL_API_URL, dateRange as DateRange, undefined, true, controller.signal)
+    fetchFunnelConditions(targetUrl, dateRange as DateRange, undefined, true, controller.signal)
       .then((values) => {
         setConditionOptions(values)
         setConditionsLoading(false)
@@ -127,7 +128,7 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
       .catch((err) => console.error('[FunnelEventsTab] fetchConditionServices error:', err))
 
     return () => controller.abort()
-  }, [dateRange, refreshKey])
+  }, [targetUrl, dateRange, refreshKey])
 
   // ── Fetch funnel events when condition is selected ──
   useEffect(() => {
@@ -142,7 +143,7 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
     const controller = new AbortController()
     setLoading(true)
     setError(null)
-    fetchFunnelEvents(MIXPANEL_API_URL, dateRange as DateRange, selectedCondition, undefined, controller.signal)
+    fetchFunnelEvents(targetUrl, dateRange as DateRange, selectedCondition, undefined, controller.signal)
       .then((data: FunnelEventsResponse) => {
         const {eventCounts, qfsStepsByFlow, paramBreakdowns: bd, qfsStepBreakdowns: qfsStepBd} = data
         setParamBreakdowns(bd)
@@ -167,7 +168,7 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
         setLoading(false)
       })
     return () => controller.abort()
-  }, [dateRange, selectedCondition, refreshKey])
+  }, [targetUrl, dateRange, selectedCondition, refreshKey])
 
   const qfsTotal = useMemo(
     () => qfsFlows.reduce((sum, f) => sum + (f.steps[0]?.count ?? 0), 0),
@@ -203,14 +204,14 @@ export function FunnelEventsTab({dateRange}: {apiUrl: string; dateRange: string}
   const handleFetchLatest = useCallback(async () => {
     setClearing(true)
     try {
-      await clearMixpanelCache(MIXPANEL_API_URL)
+      await clearMixpanelCache(targetUrl)
     } catch (err) {
       console.error('[FunnelEventsTab] clear-cache error:', err)
     } finally {
       setClearing(false)
       setRefreshKey((k) => k + 1)
     }
-  }, [])
+  }, [targetUrl])
 
   const handleClosePatientModal = useCallback(() => setPatientModalOpen(false), [])
 

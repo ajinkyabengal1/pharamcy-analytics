@@ -72,7 +72,8 @@ function EmptyState({label}: {label: string}) {
   )
 }
 
-export function ConditionsProductsTab({dateRange}: {apiUrl?: string; dateRange: DateRange}) {
+export function ConditionsProductsTab({apiUrl, dateRange}: {apiUrl?: string; dateRange: DateRange}) {
+  const targetUrl = apiUrl || MIXPANEL_API_URL
   const [subTab, setSubTab] = useState<SubTab>('conditions')
   const [data, setData] = useState<TopEntitiesResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -89,28 +90,28 @@ export function ConditionsProductsTab({dateRange}: {apiUrl?: string; dateRange: 
   useEffect(() => {
     const controller = new AbortController()
     setTopConditionSearchesLoading(true)
-    fetchTopSearches(MIXPANEL_API_URL, dateRange, 'condition', controller.signal)
+    fetchTopSearches(targetUrl, dateRange, 'condition', controller.signal)
       .then((res) => { if (!controller.signal.aborted) setTopConditionSearches(res) })
       .catch((err) => { if (err instanceof Error && err.name === 'AbortError') return })
       .finally(() => { if (!controller.signal.aborted) setTopConditionSearchesLoading(false) })
     return () => controller.abort()
-  }, [dateRange, fetchTick])
+  }, [targetUrl, dateRange, fetchTick])
 
   useEffect(() => {
     const controller = new AbortController()
     setTopProductSearchesLoading(true)
-    fetchTopSearches(MIXPANEL_API_URL, dateRange, 'product', controller.signal)
+    fetchTopSearches(targetUrl, dateRange, 'product', controller.signal)
       .then((res) => { if (!controller.signal.aborted) setTopProductSearches(res) })
       .catch((err) => { if (err instanceof Error && err.name === 'AbortError') return })
       .finally(() => { if (!controller.signal.aborted) setTopProductSearchesLoading(false) })
     return () => controller.abort()
-  }, [dateRange, fetchTick])
+  }, [targetUrl, dateRange, fetchTick])
 
   useEffect(() => {
     const controller = new AbortController()
     setLoading(true)
     setError(null)
-    fetchTopEntities(MIXPANEL_API_URL, dateRange, undefined, controller.signal)
+    fetchTopEntities(targetUrl, dateRange, undefined, controller.signal)
       .then((res) => {
         if (!controller.signal.aborted) setData(res)
       })
@@ -122,7 +123,7 @@ export function ConditionsProductsTab({dateRange}: {apiUrl?: string; dateRange: 
         if (!controller.signal.aborted) setLoading(false)
       })
     return () => controller.abort()
-  }, [dateRange, fetchTick])
+  }, [targetUrl, dateRange, fetchTick])
 
   const conditionBarData = useMemo(
     () =>
@@ -181,6 +182,8 @@ export function ConditionsProductsTab({dateRange}: {apiUrl?: string; dateRange: 
     border: '1px solid #e2e8f0',
     boxShadow: '0 4px 16px rgba(0,0,0,.08)',
   }
+  // Recharts' default label colour is a pale grey that is hard to read on the white tooltip.
+  const barTooltipLabelStyle = {color: '#0f172a', fontWeight: 600}
 
   return (
     <div style={{animation: 'ga-fadein .25s ease', display: 'flex', flexDirection: 'column', gap: 20}}>
@@ -288,6 +291,7 @@ export function ConditionsProductsTab({dateRange}: {apiUrl?: string; dateRange: 
                           (payload?.[0]?.payload?.fullName ?? label) as string
                         }
                         contentStyle={barTooltipStyle}
+                        labelStyle={barTooltipLabelStyle}
                         cursor={{fill: 'rgba(99,102,241,0.06)'}}
                       />
                       <Bar dataKey="Views" radius={[5, 5, 0, 0]} maxBarSize={44}>
@@ -581,6 +585,7 @@ export function ConditionsProductsTab({dateRange}: {apiUrl?: string; dateRange: 
                         (payload?.[0]?.payload?.fullName ?? label) as string
                       }
                       contentStyle={barTooltipStyle}
+                      labelStyle={barTooltipLabelStyle}
                       cursor={{fill: 'rgba(99,102,241,0.06)'}}
                     />
                     <Bar dataKey="Views" radius={[5, 5, 0, 0]} maxBarSize={48}>

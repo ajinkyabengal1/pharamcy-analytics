@@ -226,6 +226,55 @@ export const fDur = (s: number) => {
 export const fPct = (v: number) => `${(v * 100).toFixed(1)}%`
 export const fEngPct = (v: number) => `${(v * 100).toFixed(0)}%`
 
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/**
+ * Recharts `interval` that shows every Nth tick so labels stay evenly spaced
+ * (`preserveStartEnd` forces the last tick, which squeezes the final gap).
+ */
+export const evenTickInterval = (count: number, maxTicks = 8): number =>
+  Math.max(0, Math.ceil(count / maxTicks) - 1)
+
+export const formatDateTick = (v: string): string => {
+  if (!v || typeof v !== 'string') return ''
+  // ISO format: YYYY-MM-DD
+  if (v.length === 10 && v[4] === '-' && v[7] === '-') {
+    const m = parseInt(v.slice(5, 7), 10) - 1
+    const d = parseInt(v.slice(8, 10), 10)
+    return `${d} ${MONTH_NAMES[m] || v.slice(5, 7)}`
+  }
+  // Compact format: YYYYMMDD
+  if (v.length === 8 && !v.includes('-') && !v.includes('/')) {
+    const m = parseInt(v.slice(4, 6), 10) - 1
+    const d = parseInt(v.slice(6, 8), 10)
+    return `${d} ${MONTH_NAMES[m] || v.slice(4, 6)}`
+  }
+  // Slash format: MM/DD
+  if (v.length === 5 && v[2] === '/') {
+    const m = parseInt(v.slice(0, 2), 10) - 1
+    const d = parseInt(v.slice(3, 5), 10)
+    return `${d} ${MONTH_NAMES[m] || v.slice(0, 2)}`
+  }
+  return v
+}
+
+export const formatTooltipDate = (v: any): string => {
+  if (typeof v !== 'string') return typeof v === 'number' ? String(v) : ''
+  if (v.length === 10 && v[4] === '-' && v[7] === '-') {
+    const y = v.slice(0, 4)
+    const m = parseInt(v.slice(5, 7), 10) - 1
+    const d = parseInt(v.slice(8, 10), 10)
+    return `${d} ${MONTH_NAMES[m] || v.slice(5, 7)} ${y}`
+  }
+  if (v.length === 8 && !v.includes('-') && !v.includes('/')) {
+    const y = v.slice(0, 4)
+    const m = parseInt(v.slice(4, 6), 10) - 1
+    const d = parseInt(v.slice(6, 8), 10)
+    return `${d} ${MONTH_NAMES[m] || v.slice(4, 6)} ${y}`
+  }
+  return v
+}
+
 export const GLOBAL_CSS = `
 @keyframes ga-spin   { to { transform: rotate(360deg); } }
 @keyframes ga-pulse  { 0%,100%{box-shadow:0 0 0 3px rgba(62,207,142,.3)} 50%{box-shadow:0 0 0 7px rgba(62,207,142,.08)} }
@@ -238,13 +287,14 @@ export const GLOBAL_CSS = `
 .ga-tooltip-wrap { position:relative; display:inline-flex; align-items:center; }
 .ga-tooltip-wrap .ga-tip {
   visibility:hidden; opacity:0; pointer-events:none;
-  position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+  position:absolute; bottom:calc(100% + 6px); right:-6px;
   background:#1e293b; color:#f1f5f9; font-size:12px; line-height:1.5;
   padding:8px 12px; border-radius:7px; white-space:normal; width:220px;
+  max-width:calc(100vw - 32px);
   box-shadow:0 4px 16px rgba(0,0,0,.18); z-index:9999; transition:opacity .15s;
 }
 .ga-tooltip-wrap .ga-tip::after {
-  content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  content:''; position:absolute; top:100%; right:10px;
   border:5px solid transparent; border-top-color:#1e293b;
 }
 .ga-tooltip-wrap:hover .ga-tip { visibility:visible; opacity:1; }
