@@ -1,10 +1,18 @@
 {
   "name": "healthya-pharmacy-analytics",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Unified analytics package for pharmacy platforms: Google Analytics 4, Mixpanel funnels, and Google Search Console with Sanity Studio dashboards.",
-  "repository": { "type": "git", "url": "git+https://github.com/ajinkyabengal1/pharamcy-analytics.git" },
-  "publishConfig": { "registry": "https://registry.npmjs.org", "access": "public" },
-  "engines": { "node": ">=20" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajinkyabengal1/pharamcy-analytics.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
