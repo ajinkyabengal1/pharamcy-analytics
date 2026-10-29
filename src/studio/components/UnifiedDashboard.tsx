@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react'
+import React, {useState, useEffect, useLayoutEffect, useCallback, useRef} from 'react'
 import {
   LayoutDashboard,
   BarChart3,
@@ -110,11 +110,23 @@ export function UnifiedDashboard({
 }: UnifiedDashboardProps) {
   // Main center section: 'all' | 'analytics' | 'custom' | 'search-console'
   const [activeMainSection, setActiveMainSection] = useState<MainSection>('all')
+  const pillTrackRef = useRef<HTMLDivElement>(null)
+  const [pillIndicator, setPillIndicator] = useState<{left: number; width: number} | null>(null)
+  useLayoutEffect(() => {
+    const el = pillTrackRef.current?.querySelector<HTMLElement>('.ad-center-pill.active')
+    if (el) setPillIndicator({left: el.offsetLeft, width: el.offsetWidth})
+  }, [activeMainSection])
   const [activeTab, setActiveTab] = useState<UnifiedTabId>('all-overview')
   const [scActiveTab, setScActiveTab] = useState<ScTab>('overview')
 
   // Date range
   const [dateRange, setDateRange] = useState<DateRange>('30')
+  const rangeTrackRef = useRef<HTMLDivElement>(null)
+  const [rangeIndicator, setRangeIndicator] = useState<{left: number; width: number} | null>(null)
+  useLayoutEffect(() => {
+    const el = rangeTrackRef.current?.querySelector<HTMLElement>('.ad-range-btn.active')
+    if (el) setRangeIndicator({left: el.offsetLeft, width: el.offsetWidth})
+  }, [dateRange, activeMainSection])
 
   // Sidebar collapsible groups
   const [gaOpen, setGaOpen] = useState(true)
@@ -252,15 +264,40 @@ export function UnifiedDashboard({
           cursor: pointer;
           transition: all 0.15s ease;
         }
+        .ad-center-pill {
+          position: relative;
+          z-index: 1;
+        }
         .ad-center-pill:hover {
           color: #1e293b;
           background: #f1f5f9;
         }
-        .ad-center-pill.active {
+        .ad-center-pill.active,
+        .ad-center-pill.active:hover {
           color: #fff;
-          background: #2563eb;
+          background: transparent;
           font-weight: 600;
+        }
+        .ad-pill-indicator {
+          position: absolute;
+          top: 3px;
+          bottom: 3px;
+          border-radius: 20px;
+          background: #2563eb;
           box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28);
+          transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
+        }
+        .ad-range-btn { position: relative; z-index: 1; }
+        .ad-range-indicator {
+          position: absolute;
+          top: 2px;
+          bottom: 2px;
+          border-radius: 5px;
+          background: #fff;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+          transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
         }
         .ad-subtab-btn {
           display: flex;
@@ -338,7 +375,9 @@ export function UnifiedDashboard({
 
         {/* ══ CENTER: CENTRALIZED TAB SWITCHER (All, Analytics, Custom Analytics, Search Console) ══ */}
         <div
+          ref={pillTrackRef}
           style={{
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             background: '#f8fafc',
@@ -348,6 +387,9 @@ export function UnifiedDashboard({
             gap: 2,
           }}
         >
+          {pillIndicator && (
+            <span className="ad-pill-indicator" style={{left: pillIndicator.left, width: pillIndicator.width}} />
+          )}
           {/* Option 1: All */}
           <button
             className={`ad-center-pill ${activeMainSection === 'all' ? 'active' : ''}`}
@@ -437,10 +479,14 @@ export function UnifiedDashboard({
           ) : (
             <>
               {/* Quick Date Range */}
-              <div style={{display: 'flex', gap: 3, background: '#f1f5f9', padding: 2, borderRadius: 7}}>
+              <div ref={rangeTrackRef} style={{position: 'relative', display: 'flex', gap: 3, background: '#f1f5f9', padding: 2, borderRadius: 7}}>
+                {rangeIndicator && (
+                  <span className="ad-range-indicator" style={{left: rangeIndicator.left, width: rangeIndicator.width}} />
+                )}
                 {DATE_RANGES.map((r) => (
                   <button
                     key={r.value}
+                    className={`ad-range-btn ${dateRange === r.value ? 'active' : ''}`}
                     onClick={() => setDateRange(r.value)}
                     style={{
                       padding: '4px 8px',
@@ -448,10 +494,10 @@ export function UnifiedDashboard({
                       fontWeight: dateRange === r.value ? 700 : 500,
                       borderRadius: 5,
                       border: 'none',
-                      background: dateRange === r.value ? '#fff' : 'transparent',
+                      background: 'transparent',
                       color: dateRange === r.value ? '#2563eb' : '#64748b',
                       cursor: 'pointer',
-                      boxShadow: dateRange === r.value ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                      transition: 'color 0.3s ease',
                     }}
                   >
                     {r.label}

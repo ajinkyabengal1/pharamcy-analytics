@@ -120,7 +120,6 @@ export interface MixpanelAnalyticsData {
   productEvents: ProductEventData[];
   userProperties: UserPropertyData[];
   funnel?: FunnelStepData[];
-  isStaticCatalog?: boolean;
   upgradeMessage?: string;
 }
 

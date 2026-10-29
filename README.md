@@ -8,7 +8,7 @@
 ## 🌟 Key Features
 
 1. **Centralized Tab Switcher (Center of the Page)**
-   - **All (Default)**: Consolidated executive overview combining Google Organic Search, visitor metrics, and patient pre-consultation & prescription order conversion funnels. Displays all three groups in the sidebar simultaneously (as in the Highfield package).
+   - **All (Default)**: Consolidated executive overview combining Google Organic Search, visitor metrics, and patient pre-consultation & prescription order conversion funnels. Displays all three groups in the sidebar simultaneously.
    - **Analytics**: Dedicated Google Analytics 4 views (Overview, Traffic, Content, Audience, Geography, Events, Acquisition).
    - **Custom Analytics**: Healthcare journey funnels (Pre-Consult funnel steps, drop-offs, PM Funnel, Conditions & Products overview).
    - **Search Console**: Google organic search performance (Top queries, landing pages, rankings, devices, countries, search appearance, and sitemaps).
@@ -173,7 +173,7 @@ export default defineConfig({
   plugins: [
     pharmacyAnalyticsPlugin({
       apiUrl: '/api/analytics',
-      title: 'Highfield Analytics',
+      title: 'Pharmacy Analytics',
     }),
   ],
 })
@@ -188,7 +188,7 @@ export default function AdminAnalyticsPage() {
   return (
     <PharmacyAnalyticsDashboard
       apiUrl="/api/analytics"
-      brandName="Highfield Pharmacy"
+      brandName="Your Pharmacy"
     />
   )
 }
@@ -200,7 +200,7 @@ export default function AdminAnalyticsPage() {
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [H] Highfield Analytics        [ All | Analytics | Custom Analytics | Search Console ]  [7d|14d|30d|90d] [Refresh]│
+│ [P] Pharmacy Analytics       [ All | Analytics | Custom Analytics | Search Console ]  [7d|14d|30d|90d] [Refresh]│
 ├─────────────────────────┬──────────────────────────────────────────────────────────────┤
 │ ▦ Executive Overview    │  EXECUTIVE SUMMARY BANNER & LIVE ACTIVE VISITORS             │
 │                         │                                                              │
