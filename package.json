@@ -1,5 +1,5 @@
 {
-  "name": "healthya-pharmacy-analytics",
+  "name": "@healthya-team/pharmacy-analytics",
   "version": "1.0.2",
   "description": "Unified analytics package for pharmacy platforms: Google Analytics 4, Mixpanel funnels, and Google Search Console with Sanity Studio dashboards.",
   "repository": {

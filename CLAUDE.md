@@ -13,7 +13,7 @@ Package manager is pnpm. There is no test suite.
 
 ## What this is
 
-A published npm library (`healthya-pharmacy-analytics`) consumed by a Next.js + Sanity Studio app. It has no app of its own; to see changes working, build and link/install it into a consumer. The README still refers to the old name `@healthya-team/pharmacy-analytics`; the real package name is in `package.json`.
+A published npm library (`@healthya-team/pharmacy-analytics`) consumed by a Next.js + Sanity Studio app. It has no app of its own; to see changes working, build and link/install it into a consumer.
 
 ## Architecture
 
