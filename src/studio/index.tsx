@@ -118,6 +118,12 @@ export interface PharmacyAnalyticsPluginConfig {
   mixpanelApiUrl?: string
   title?: string
   name?: string
+  /** Hide the Custom Analytics (Mixpanel funnels) section. Default: false. */
+  hideCustomAnalytics?: boolean
+  /** Hide the Google Analytics (GA4) section. Default: false. */
+  hideAnalytics?: boolean
+  /** Hide the Search Console section. Default: false. */
+  hideSearchConsole?: boolean
   icon?: React.ComponentType
 }
 
@@ -157,6 +163,9 @@ export function pharmacyAnalyticsPlugin(config: PharmacyAnalyticsPluginConfig = 
               scApiUrl={config.scApiUrl}
               mixpanelApiUrl={config.mixpanelApiUrl}
               brandName={toolTitle}
+              hideCustomAnalytics={config.hideCustomAnalytics}
+              hideAnalytics={config.hideAnalytics}
+              hideSearchConsole={config.hideSearchConsole}
             />
           )
         },

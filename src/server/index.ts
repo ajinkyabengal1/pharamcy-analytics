@@ -1114,6 +1114,44 @@ export function createAnalyticsApiHandler(config?: AnalyticsServerConfig) {
         process.env.SEARCH_CONSOLE_PRIVATE_KEY ||
         gaPrivateKey;
 
+      // ── 0. Config status (names of missing keys only, never values) ──
+      if (mode === "config-status") {
+        const groups = [
+          {
+            id: "ga",
+            label: "Google Analytics 4",
+            keys: [
+              { key: "GA_PROPERTY_ID", description: "GA4 property ID (Admin → Property details)", set: !!gaPropertyId },
+              { key: "GA_SERVICE_ACCOUNT_EMAIL", description: "Service account email with Viewer access to the GA4 property", set: !!gaClientEmail },
+              { key: "GA_PRIVATE_KEY", description: "Service account private key (PKCS#8, keep \\n escapes)", set: !!gaPrivateKey },
+            ],
+          },
+          {
+            id: "search-console",
+            label: "Google Search Console",
+            keys: [
+              { key: "SEARCH_CONSOLE_SITE_URL", description: "Verified site URL, e.g. https://your-pharmacy.co.uk", set: !!scSiteUrl },
+              { key: "GA_SERVICE_ACCOUNT_EMAIL", description: "Service account email added in Search Console → Users and permissions", set: !!scClientEmail },
+              { key: "GA_PRIVATE_KEY", description: "Service account private key (shared with GA4)", set: !!scPrivateKey },
+            ],
+          },
+          {
+            id: "custom",
+            label: "Mixpanel (Custom Analytics)",
+            keys: [
+              { key: "MIXPANEL_PROJECT_ID", description: "Mixpanel project ID (Project Settings → Overview)", set: !!process.env.MIXPANEL_PROJECT_ID },
+              { key: "MIXPANEL_SERVICE_ACCOUNT_USERNAME", description: "Mixpanel service account username", set: !!process.env.MIXPANEL_SERVICE_ACCOUNT_USERNAME },
+              { key: "MIXPANEL_SERVICE_ACCOUNT_SECRET", description: "Mixpanel service account secret", set: !!process.env.MIXPANEL_SERVICE_ACCOUNT_SECRET },
+            ],
+          },
+        ].map((g) => ({
+          id: g.id,
+          label: g.label,
+          missing: g.keys.filter((k) => !k.set).map(({ key, description }) => ({ key, description })),
+        }));
+        return Response.json({ groups });
+      }
+
       const isSearchConsole =
         mode === "search-console" ||
         url.pathname.endsWith("/search-console") ||

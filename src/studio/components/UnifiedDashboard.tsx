@@ -35,6 +35,8 @@ import {
 
 // Combined executive overview tab
 import {CombinedOverviewTab} from '../tabs/combined-overview-tab'
+import {MissingKeysCard, useConfigStatus} from './missing-keys-card'
+import {ErrorState, GA_ACCENT} from '../search-console/dashboard-ui'
 
 export type MainSection = 'all' | 'analytics' | 'custom' | 'search-console'
 
@@ -66,6 +68,12 @@ export interface UnifiedDashboardProps {
   scApiUrl?: string
   mixpanelApiUrl?: string
   brandName?: string
+  /** Hide the Custom Analytics (Mixpanel funnels) section everywhere. */
+  hideCustomAnalytics?: boolean
+  /** Hide the Google Analytics (GA4) section everywhere. */
+  hideAnalytics?: boolean
+  /** Hide the Search Console section everywhere. */
+  hideSearchConsole?: boolean
 }
 
 
@@ -107,16 +115,36 @@ export function UnifiedDashboard({
   scApiUrl,
   mixpanelApiUrl,
   brandName = 'Pharmacy Analytics',
+  hideCustomAnalytics = false,
+  hideAnalytics = false,
+  hideSearchConsole = false,
 }: UnifiedDashboardProps) {
+  // Sections left after hiding; the combined 'All' view only makes sense with more than one.
+  const visibleSections: MainSection[] = [
+    ...(hideAnalytics ? [] : (['analytics'] as const)),
+    ...(hideCustomAnalytics ? [] : (['custom'] as const)),
+    ...(hideSearchConsole ? [] : (['search-console'] as const)),
+  ]
+  const showAll = visibleSections.length > 1
+  const firstSection: MainSection = showAll ? 'all' : (visibleSections[0] ?? 'all')
+
   // Main center section: 'all' | 'analytics' | 'custom' | 'search-console'
-  const [activeMainSection, setActiveMainSection] = useState<MainSection>('all')
+  const [activeMainSection, setActiveMainSection] = useState<MainSection>(firstSection)
   const pillTrackRef = useRef<HTMLDivElement>(null)
   const [pillIndicator, setPillIndicator] = useState<{left: number; width: number} | null>(null)
   useLayoutEffect(() => {
     const el = pillTrackRef.current?.querySelector<HTMLElement>('.ad-center-pill.active')
     if (el) setPillIndicator({left: el.offsetLeft, width: el.offsetWidth})
   }, [activeMainSection])
-  const [activeTab, setActiveTab] = useState<UnifiedTabId>('all-overview')
+  const [activeTab, setActiveTab] = useState<UnifiedTabId>(
+    firstSection === 'analytics'
+      ? 'overview'
+      : firstSection === 'custom'
+        ? 'conditions-products'
+        : firstSection === 'search-console'
+          ? 'sc-overview'
+          : 'all-overview',
+  )
   const [scActiveTab, setScActiveTab] = useState<ScTab>('overview')
 
   // Date range
@@ -205,6 +233,10 @@ export function UnifiedDashboard({
 
   /* ── Center Tab Switcher handler ── */
   const handleMainSectionChange = (section: MainSection) => {
+    if (section === 'custom' && hideCustomAnalytics) return
+    if (section === 'analytics' && hideAnalytics) return
+    if (section === 'search-console' && hideSearchConsole) return
+    if (section === 'all' && !showAll) return
     setActiveMainSection(section)
     if (section === 'all') {
       setActiveTab('all-overview')
@@ -230,6 +262,20 @@ export function UnifiedDashboard({
   }
 
   const anyLoading = loadingGa || loadingSc
+
+  // Groups whose keys matter for the section being viewed; if any are missing, show the info card.
+  const {groups: configGroups, checking: checkingConfig, refresh: refreshConfig} = useConfigStatus(apiUrl)
+  const neededGroups = (configGroups ?? []).filter((g) => {
+    if (g.missing.length === 0) return false
+    if (activeMainSection === 'analytics') return g.id === 'ga'
+    if (activeMainSection === 'search-console') return g.id === 'search-console'
+    if (activeMainSection === 'custom') return g.id === 'custom'
+    return (
+      (g.id === 'ga' && !hideAnalytics) ||
+      (g.id === 'search-console' && !hideSearchConsole) ||
+      (g.id === 'custom' && !hideCustomAnalytics)
+    )
+  })
 
   return (
     <div
@@ -391,6 +437,7 @@ export function UnifiedDashboard({
             <span className="ad-pill-indicator" style={{left: pillIndicator.left, width: pillIndicator.width}} />
           )}
           {/* Option 1: All */}
+          {showAll && (
           <button
             className={`ad-center-pill ${activeMainSection === 'all' ? 'active' : ''}`}
             onClick={() => handleMainSectionChange('all')}
@@ -398,8 +445,10 @@ export function UnifiedDashboard({
             <LayoutDashboard size={15} />
             <span>All</span>
           </button>
+          )}
 
           {/* Option 2: Analytics */}
+          {!hideAnalytics && (
           <button
             className={`ad-center-pill ${activeMainSection === 'analytics' ? 'active' : ''}`}
             onClick={() => handleMainSectionChange('analytics')}
@@ -407,17 +456,21 @@ export function UnifiedDashboard({
             <BarChart3 size={15} />
             <span>Analytics</span>
           </button>
+          )}
 
           {/* Option 3: Custom Analytics */}
-          <button
-            className={`ad-center-pill ${activeMainSection === 'custom' ? 'active' : ''}`}
-            onClick={() => handleMainSectionChange('custom')}
-          >
-            <Pill size={15} />
-            <span>Custom Analytics</span>
-          </button>
+          {!hideCustomAnalytics && (
+            <button
+              className={`ad-center-pill ${activeMainSection === 'custom' ? 'active' : ''}`}
+              onClick={() => handleMainSectionChange('custom')}
+            >
+              <Pill size={15} />
+              <span>Custom Analytics</span>
+            </button>
+          )}
 
           {/* Option 4: Search Console */}
+          {!hideSearchConsole && (
           <button
             className={`ad-center-pill ${activeMainSection === 'search-console' ? 'active' : ''}`}
             onClick={() => handleMainSectionChange('search-console')}
@@ -425,6 +478,7 @@ export function UnifiedDashboard({
             <Search size={15} />
             <span>Search Console</span>
           </button>
+          )}
         </div>
 
         {/* Right: Date Range Selector & Refresh */}
@@ -531,10 +585,12 @@ export function UnifiedDashboard({
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
+            {/* ═══════════════════════════════════════════════════════════════════════
           MAIN BODY LAYOUT
          ═══════════════════════════════════════════════════════════════════════ */}
-      {activeMainSection === 'search-console' ? (
+      {neededGroups.length > 0 ? (
+        <MissingKeysCard groups={neededGroups} checking={checkingConfig} onCheckAgain={refreshConfig} />
+      ) : activeMainSection === 'search-console' ? (
         <div style={{flex: 1, minHeight: 0, overflow: 'hidden'}}>
           <SearchConsoleDashboard
             apiUrl={effectiveScUrl}
@@ -586,7 +642,7 @@ export function UnifiedDashboard({
           {/* Subsystem Navigation Groups */}
           <nav style={{flex: 1, overflowY: 'auto', padding: '0 10px 16px'}}>
             {/* ── 1. Google Analytics Group (Shown in 'all' and 'analytics') ── */}
-            {(activeMainSection === 'all' || activeMainSection === 'analytics') && (
+            {!hideAnalytics && (activeMainSection === 'all' || activeMainSection === 'analytics') && (
               <div style={{marginBottom: 14}}>
                 <button
                   disabled={!isAll}
@@ -653,7 +709,7 @@ export function UnifiedDashboard({
             )}
 
             {/* ── 2. Custom Analytics Group (Shown in 'all' and 'custom') ── */}
-            {(activeMainSection === 'all' || activeMainSection === 'custom') && (
+            {!hideCustomAnalytics && (activeMainSection === 'all' || activeMainSection === 'custom') && (
               <div style={{marginBottom: 14}}>
                 <button
                   disabled={!isAll}
@@ -720,7 +776,7 @@ export function UnifiedDashboard({
             )}
 
             {/* ── 3. Google Search Console Group (Shown in 'all') ── */}
-            {activeMainSection === 'all' && (
+            {!hideSearchConsole && activeMainSection === 'all' && (
               <div style={{marginBottom: 14}}>
                 <button
                   disabled={!isAll}
@@ -789,6 +845,7 @@ export function UnifiedDashboard({
 
           {/* Bottom of Sidebar: Config Status Hints */}
           <div style={{padding: 12, borderTop: '1px solid #f1f5f9', fontSize: 11, color: '#94a3b8'}}>
+            {!hideAnalytics && (
             <div style={{display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4}}>
               <span
                 style={{
@@ -800,6 +857,8 @@ export function UnifiedDashboard({
               />
               <span>GA4: {gaError ? 'Error' : 'Connected'}</span>
             </div>
+            )}
+            {!hideSearchConsole && (
             <div style={{display: 'flex', alignItems: 'center', gap: 6}}>
               <span
                 style={{
@@ -811,6 +870,7 @@ export function UnifiedDashboard({
               />
               <span>Search Console: {scError ? 'Needs Config' : 'Connected'}</span>
             </div>
+            )}
           </div>
         </aside>
 
@@ -854,12 +914,17 @@ export function UnifiedDashboard({
               scData={scData}
               loadingGa={loadingGa}
               loadingSc={loadingSc}
+              hideCustomAnalytics={hideCustomAnalytics}
+              hideAnalytics={hideAnalytics}
+              hideSearchConsole={hideSearchConsole}
               onSelectSection={(section, subTab) => {
                 if (section === 'search-console') {
                   const mapped = subTab ? (subTab.replace('sc-', '') as ScTab) : 'overview'
                   setScActiveTab(mapped)
                   setActiveMainSection('search-console')
                 } else {
+                  if (section === 'custom' && hideCustomAnalytics) return
+                  if (section === 'analytics' && hideAnalytics) return
                   setActiveMainSection(section)
                   if (subTab) {
                     setActiveTab(subTab as UnifiedTabId)
@@ -874,6 +939,14 @@ export function UnifiedDashboard({
           )}
 
           {/* 2. Google Analytics Tabs */}
+          {gaError && !gaData && GA_SUB_TABS.some((t) => t.id === activeTab) && (
+            <ErrorState
+              title="Failed to load Google Analytics data"
+              error={gaError}
+              onRetry={loadGaData}
+              accent={GA_ACCENT}
+            />
+          )}
           {activeTab === 'overview' && gaData && (
             <OverviewTab data={gaData} loading={loadingGa} />
           )}
@@ -897,13 +970,13 @@ export function UnifiedDashboard({
           )}
 
           {/* 3. Custom Analytics Tabs */}
-          {activeTab === 'conditions-products' && (
+          {!hideCustomAnalytics && activeTab === 'conditions-products' && (
             <ConditionsProductsTab apiUrl={mixpanelApiUrl} dateRange={dateRange} />
           )}
-          {activeTab === 'funnel' && (
+          {!hideCustomAnalytics && activeTab === 'funnel' && (
             <FunnelEventsTab apiUrl={mixpanelApiUrl} dateRange={dateRange} />
           )}
-          {activeTab === 'pm-funnel' && (
+          {!hideCustomAnalytics && activeTab === 'pm-funnel' && (
             <PmFunnelTab apiUrl={mixpanelApiUrl} dateRange={dateRange} />
           )}
 
