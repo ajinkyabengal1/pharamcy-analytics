@@ -26,6 +26,9 @@ export interface CombinedOverviewTabProps {
   loadingGa: boolean
   loadingSc: boolean
   onSelectSection: (section: 'analytics' | 'custom' | 'search-console', subTab?: string) => void
+  hideCustomAnalytics?: boolean
+  hideAnalytics?: boolean
+  hideSearchConsole?: boolean
 }
 
 export function CombinedOverviewTab({
@@ -34,6 +37,9 @@ export function CombinedOverviewTab({
   loadingGa,
   loadingSc,
   onSelectSection,
+  hideCustomAnalytics = false,
+  hideAnalytics = false,
+  hideSearchConsole = false,
 }: CombinedOverviewTabProps) {
 
   // GA metrics
@@ -136,6 +142,7 @@ export function CombinedOverviewTab({
           }}
         >
           {/* GSC Clicks */}
+          {!hideSearchConsole && (
           <MetricCard
             label="Organic Search Clicks"
             value={fNum(scClicks)}
@@ -143,8 +150,10 @@ export function CombinedOverviewTab({
             loading={loadingSc}
             info="Google organic search traffic that landed on your pharmacy website"
           />
+          )}
 
           {/* GSC Impressions */}
+          {!hideSearchConsole && (
           <MetricCard
             label="Google Impressions"
             value={fNum(scImpressions)}
@@ -152,8 +161,10 @@ export function CombinedOverviewTab({
             loading={loadingSc}
             info="Number of times your pharmacy appeared in Google Search results"
           />
+          )}
 
           {/* GA Total Users */}
+          {!hideAnalytics && (
           <MetricCard
             label="Total Site Visitors"
             value={fNum(totalUsers)}
@@ -161,8 +172,10 @@ export function CombinedOverviewTab({
             loading={loadingGa}
             info="Unique visitors tracked by Google Analytics 4"
           />
+          )}
 
           {/* GA Sessions */}
+          {!hideAnalytics && (
           <MetricCard
             label="Browsing Sessions"
             value={fNum(sessions)}
@@ -170,7 +183,10 @@ export function CombinedOverviewTab({
             loading={loadingGa}
             info="Total browsing sessions across the site"
           />
+          )}
 
+          {!hideCustomAnalytics && (
+          <>
           {/* Funnel: Pre-consult Starts */}
           <MetricCard
             label="Pre-Consult Starts"
@@ -188,6 +204,8 @@ export function CombinedOverviewTab({
             loading={loadingGa}
             info="Prescription & treatment checkout completions"
           />
+          </>
+          )}
         </div>
       </div>
 
@@ -200,6 +218,7 @@ export function CombinedOverviewTab({
         }}
       >
         {/* Jump 1: Google Analytics */}
+        {!hideAnalytics && (
         <div
           onClick={() => onSelectSection('analytics')}
           style={{
@@ -284,8 +303,10 @@ export function CombinedOverviewTab({
             </div>
           </div>
         </div>
+        )}
 
         {/* Jump 2: Custom Analytics */}
+        {!hideCustomAnalytics && (
         <div
           onClick={() => onSelectSection('custom')}
           style={{
@@ -370,8 +391,10 @@ export function CombinedOverviewTab({
             </div>
           </div>
         </div>
+        )}
 
         {/* Jump 3: Search Console */}
+        {!hideSearchConsole && (
         <div
           onClick={() => onSelectSection('search-console')}
           style={{
@@ -456,6 +479,7 @@ export function CombinedOverviewTab({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* ── Main Data Visualizations: Search Trend vs Analytics Trend ── */}

@@ -179,6 +179,21 @@ export default defineConfig({
 })
 ```
 
+**Plugin options:**
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `apiUrl` | `/api/analytics` | GA4 / Search Console route |
+| `mixpanelApiUrl` | – | Mixpanel route for Custom Analytics |
+| `title` | `Analytics` | Tool title |
+| `hideCustomAnalytics` | `false` | Hides the Custom Analytics tab, sidebar group and funnel KPIs; no Mixpanel requests are made |
+| `hideAnalytics` | `false` | Hides the Google Analytics (GA4) tab, sidebar group, KPIs and status |
+| `hideSearchConsole` | `false` | Hides the Search Console tab, sidebar group, KPIs and status |
+
+If only one section is left visible, the combined **All** view is dropped and the dashboard opens on that section.
+
+**Missing keys:** the dashboard calls `GET /api/analytics?mode=config-status`. If a visible section's required env keys (`GA_PROPERTY_ID`, `GA_SERVICE_ACCOUNT_EMAIL`, `GA_PRIVATE_KEY`, `SEARCH_CONSOLE_SITE_URL`; for Custom Analytics `MIXPANEL_PROJECT_ID`, `MIXPANEL_SERVICE_ACCOUNT_USERNAME`, `MIXPANEL_SERVICE_ACCOUNT_SECRET`) are missing, an info card replaces the empty dashboard, listing the missing keys with a copyable `.env.local` snippet and a **Check again** button. Only key names are returned, never values.
+
 #### Or use the React component standalone:
 
 ```tsx
